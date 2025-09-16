@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Simple Transactional Email</title>
+    <style media="all" type="text/css">
+    /* -------------------------------------
+    GLOBAL RESETS
+------------------------------------- */
+    
+    body {
+      font-family: Helvetica, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      font-size: 16px;
+      line-height: 1.3;
+      -ms-text-size-adjust: 100%;
+      -webkit-text-size-adjust: 100%;
+    }
+    
+    table {
+      border-collapse: separate;
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+      width: 100%;
+    }
+    
+    table td {
+      font-family: Helvetica, sans-serif;
+      font-size: 16px;
+      vertical-align: top;
+    }
+    /* -------------------------------------
+    BODY & CONTAINER
+------------------------------------- */
+    
+    body {
+      background-color: #f4f5f6;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .body {
+      background-color: #f4f5f6;
+      width: 100%;
+    }
+    
+    .container {
+      margin: 0 auto !important;
+      max-width: 600px;
+      padding: 0;
+      padding-top: 24px;
+      width: 600px;
+    }
+    
+    .content {
+      box-sizing: border-box;
+      display: block;
+      margin: 0 auto;
+      max-width: 600px;
+      padding: 0;
+    }
+    /* -------------------------------------
+    HEADER, FOOTER, MAIN
+------------------------------------- */
+    
+    .main {
+      background: #ffffff;
+      border: 1px solid #eaebed;
+      border-radius: 16px;
+      width: 100%;
+    }
+    
+    .wrapper {
+      box-sizing: border-box;
+      padding: 24px;
+    }
+    
+    .footer {
+      clear: both;
+      padding-top: 24px;
+      text-align: center;
+      width: 100%;
+    }
+    
+    .footer td,
+    .footer p,
+    .footer span,
+    .footer a {
+      color: #9a9ea6;
+      font-size: 16px;
+      text-align: center;
+    }
+    /* -------------------------------------
+    TYPOGRAPHY
+------------------------------------- */
+    
+    p {
+      font-family: Helvetica, sans-serif;
+      font-size: 16px;
+      font-weight: normal;
+      margin: 0;
+      margin-bottom: 16px;
+    }
+    
+    a {
+      color: #0867ec;
+      text-decoration: underline;
+    }
+    /* -------------------------------------
+    BUTTONS
+------------------------------------- */
+    
+    .btn {
+      box-sizing: border-box;
+      min-width: 100% !important;
+      width: 100%;
+    }
+    
+    .btn > tbody > tr > td {
+      padding-bottom: 16px;
+    }
+    
+    .btn table {
+      width: auto;
+    }
+    
+    .btn table td {
+      background-color: #ffffff;
+      border-radius: 4px;
+      text-align: center;
+    }
+    
+    .btn a {
+      background-color: #ffffff;
+      border: solid 2px #0867ec;
+      border-radius: 4px;
+      box-sizing: border-box;
+      color: #0867ec;
+      cursor: pointer;
+      display: inline-block;
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0;
+      padding: 12px 24px;
+      text-decoration: none;
+      text-transform: capitalize;
+    }
+    
+    .btn-primary table td {
+      background-color: #0867ec;
+    }
+    
+    .btn-primary a {
+      background-color: #0867ec;
+      border-color: #0867ec;
+      color: #ffffff;
+    }
+    
+    @media all {
+      .btn-primary table td:hover {
+        background-color: #ec0867 !important;
+      }
+      .btn-primary a:hover {
+        background-color: #ec0867 !important;
+        border-color: #ec0867 !important;
+      }
+    }
+    
+    /* -------------------------------------
+    OTHER STYLES THAT MIGHT BE USEFUL
+------------------------------------- */
+    .fw-bold {
+      font-weight: bold;
+    }
+
+    .last {
+      margin-bottom: 0;
+    }
+    
+    .first {
+      margin-top: 0;
+    }
+    
+    .align-center {
+      text-align: center;
+    }
+    
+    .align-right {
+      text-align: right;
+    }
+    
+    .align-left {
+      text-align: left;
+    }
+    
+    .text-link {
+      color: #0867ec !important;
+      text-decoration: underline !important;
+    }
+    
+    .clear {
+      clear: both;
+    }
+    
+    .mt0 {
+      margin-top: 0;
+    }
+    
+    .mb0 {
+      margin-bottom: 0;
+    }
+    
+    .preheader {
+      color: transparent;
+      display: none;
+      height: 0;
+      max-height: 0;
+      max-width: 0;
+      opacity: 0;
+      overflow: hidden;
+      mso-hide: all;
+      visibility: hidden;
+      width: 0;
+    }
+    
+    .powered-by a {
+      text-decoration: none;
+    }
+    
+    /* -------------------------------------
+    RESPONSIVE AND MOBILE FRIENDLY STYLES
+------------------------------------- */
+    
+    @media only screen and (max-width: 640px) {
+      .main p,
+      .main td,
+      .main span {
+        font-size: 16px !important;
+      }
+      .wrapper {
+        padding: 8px !important;
+      }
+      .content {
+        padding: 0 !important;
+      }
+      .container {
+        padding: 0 !important;
+        padding-top: 8px !important;
+        width: 100% !important;
+      }
+      .main {
+        border-left-width: 0 !important;
+        border-radius: 0 !important;
+        border-right-width: 0 !important;
+      }
+      .btn table {
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+      .btn a {
+        font-size: 16px !important;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+    }
+    /* -------------------------------------
+    PRESERVE THESE STYLES IN THE HEAD
+------------------------------------- */
+    
+    @media all {
+      .ExternalClass {
+        width: 100%;
+      }
+      .ExternalClass,
+      .ExternalClass p,
+      .ExternalClass span,
+      .ExternalClass font,
+      .ExternalClass td,
+      .ExternalClass div {
+        line-height: 100%;
+      }
+      .apple-link a {
+        color: inherit !important;
+        font-family: inherit !important;
+        font-size: inherit !important;
+        font-weight: inherit !important;
+        line-height: inherit !important;
+        text-decoration: none !important;
+      }
+      #MessageViewBody a {
+        color: inherit;
+        text-decoration: none;
+        font-size: inherit;
+        font-family: inherit;
+        font-weight: inherit;
+        line-height: inherit;
+      }
+    }
+    </style>
+  </head>
+  <body>
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="body">
+      <tr>
+        <td>&nbsp;</td>
+        <td class="container">
+          <div class="content">
+
+            @php
+              $due = Carbon\Carbon::parse($installment->due_date)->toFormattedDateString();
+              $amount = number_format($installment->amount, 2);
+
+              $hasOutstanding = $outstanding->isNotEmpty();
+              $totalOutstanding = $outstanding->sum('amount');
+            @endphp
+
+            <!-- START CENTERED WHITE CONTAINER -->
+
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="main">
+
+                <tr>
+                    <td class="wrapper">
+
+                      <h2>Dear, {{ $user->name }}!</h2>
+
+                      <p>We hope you're doing well!</p>
+
+                        @if($stage === 'due_2_days_before')
+                          <p>This is a friendly reminder that your installment of £{{ $amount }} is due on {{ \Carbon\Carbon::parse($due)->format('d-m-Y') }}.</p>
+                        @elseif($stage === 'late_1_day_after')
+                          <p>Our records show your installment of £{{ $amount }} due on {{ \Carbon\Carbon::parse($due)->format('d-m-Y') }} hasn’t been paid.</p>
+                        @else
+                          <p>Your installment of £{{ $amount }} due on {{ \Carbon\Carbon::parse($due)->format('d-m-Y') }} is now one month overdue.</p>
+                        @endif
+
+                        {{-- Outstanding (previous unpaid) list --}}
+                        @if($hasOutstanding)
+                          <p><strong>Other unpaid installments</strong> (earlier due dates):</p>
+
+                          <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+                            <thead style="background-color: #f2f2f2;">
+                              <tr>
+                                <th>#</th>
+                                <th>Due Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Pay</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              @foreach($outstanding as $row)
+                                @php
+                                  $rowDue = Carbon\Carbon::parse($row->due_date)->format('d-m-Y');
+                                @endphp
+                                <tr>
+                                  <td class="align-center" style="white-space: nowrap;">{{ $loop->iteration }}</td>
+                                  <td class="align-center" style="white-space: nowrap;">{{ \Carbon\Carbon::parse($rowDue)->format('d-m-Y') }}</td>
+                                  <td class="align-center" style="white-space: nowrap;">{{ currency_format($row->amount) }}</td>
+                                  <td class="align-center" style="white-space: nowrap;">{{ ucfirst($row->status) }}</td>
+                                  <td class="align-center" style="white-space: nowrap;">
+                                      <a href="https://pay.richmondcollege.co.uk/{{$row->amount}}">Pay Now</a>
+                                  </td>
+                    
+                                </tr>
+                            </tbody>
+                              @endforeach
+                              <tfoot style="background-color: #f2f2f2;">
+                              <tr>
+                                <td class="align-center fw-bold" style="white-space: nowrap;" colspan="2">Total outstanding</td>
+                                <td class="align-center fw-bold" style="white-space: nowrap;">{{ currency_format($totalOutstanding) }}</td>
+                                <td class="align-center fw-bold" style="white-space: nowrap;" colspan="2">
+                                    <a href="https://pay.richmondcollege.co.uk/{{$totalOutstanding}}">Pay All</a>
+                                </td>
+                              </tr>
+                            </tfoot>
+                          </table>
+
+                        @endif
+
+                        <br>
+
+                      <p>Please make sure to follow your installment schedule to avoid any delays. 
+                        If your payments are delayed for more than 30 days, your account will be automatically blocked!
+                      </p>
+
+                      <p>If you have any questions, feel free to contact us at any time.</p>
+
+                      <p>Thank you.</p>
+
+                      <p>
+                        <img src="{{ $message->embed(public_path('mail/logo-email.png')) }}" alt="Logo" style="height: 40px;">
+                      </p>
+                    </td>
+                </tr>
+
+              </table>
+
+              <!-- START FOOTER -->
+              <div class="footer">
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td class="content-block">
+                      <span>Richmond College Admissions Office</span><br>
+                      <span>admissions@richmondcollege.co.uk</span><br>
+                      <span>+44 7476 268672</span>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <!-- END FOOTER -->
+            
+            <!-- END CENTERED WHITE CONTAINER --></div>
+        </td>
+        <td>&nbsp;</td>
+      </tr>
+    </table>
+  </body>
+</html>
