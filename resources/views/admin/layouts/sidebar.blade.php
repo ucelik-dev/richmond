@@ -286,6 +286,24 @@
                     </li>
                 @endif
 
+
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link cursor-pointer" onclick="event.preventDefault(); getElementById('logout').submit();">
+                            <span
+                                class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </span>
+                            <span class="nav-link-title">
+                                Logout
+                            </span>
+                        </a>
+                        <form method="POST" id="logout" action="{{ route('logout') }}">
+                            @csrf
+                        </form>
+                    </li>
+               
+
                 
             </ul>
         </div>

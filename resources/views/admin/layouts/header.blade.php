@@ -103,7 +103,7 @@
                     @endcan
 
                     <a href="#" onclick="event.preventDefault(); getElementById('logout').submit();" class="dropdown-item">Logout</a>
-                    <form method="POST" id="logout" action="{{ route('logout') }}">
+                        <form method="POST" id="logout" action="{{ route('logout') }}">
                         @csrf
                     </form>
                 </div>

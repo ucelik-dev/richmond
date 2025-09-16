@@ -252,13 +252,25 @@
         STICKY MENU START
     ==============================-->
     <div class="mobile_menu_area">
-        <div class="mobile_menu_area_top">
-            <a class="mobile_menu_logo" href="index.html">
+        <div class="mobile_menu_area_top d-flex align-items-center">
+            <a class="mobile_menu_logo" href="{{ url('/') }}">
                 <img src="{{ asset('frontend/assets/images/logo2.png') }}" alt="Richmond">
             </a>
-            <div class="mobile_menu_icon d-block d-lg-none" data-bs-toggle="offcanvas"
-                data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">
+
+            <div class="ms-auto d-flex align-items-center">
+                @guest
+                <a href="{{ route('login') }}"
+                class="mobile_menu_icon d-block d-lg-none me-2" aria-label="Login">
+                <span class="mobile_menu_icon"><i class="far fa-user"></i></span>
+                </a>
+                @endguest
+
+                <div class="mobile_menu_icon d-block d-lg-none"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasWithBothOptions"
+                    aria-controls="offcanvasWithBothOptions">
                 <span class="mobile_menu_icon"><i class="far fa-stream menu_icon_bar"></i></span>
+                </div>
             </div>
         </div>
 
