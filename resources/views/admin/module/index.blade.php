@@ -80,12 +80,16 @@
                                             @endif
                                         </td>
                                         <td class="text-nowrap">
-                                            <a href="{{ route('admin.module.edit', $module->id) }}" class="btn-sm btn-primary me-2 text-decoration-none">
-                                                <i class="fa-solid fa-pen-to-square fa-lg"></i>
-                                            </a>
-                                            <a href="{{ route('admin.module.destroy', $module->id) }}" class="text-red delete-item text-decoration-none">
-                                                <i class="fa-solid fa-trash-can fa-lg"></i>
-                                            </a>
+                                            @can('edit_admin_modules')
+                                                <a href="{{ route('admin.module.edit', $module->id) }}" class="btn-sm btn-primary me-2 text-decoration-none">
+                                                    <i class="fa-solid fa-pen-to-square fa-lg"></i>
+                                                </a>
+                                            @endcan
+                                            @can('delete_admin_modules')
+                                                <a href="{{ route('admin.module.destroy', $module->id) }}" class="text-red delete-item text-decoration-none">
+                                                    <i class="fa-solid fa-trash-can fa-lg"></i>
+                                                </a>
+                                            @endcan
                                         </td>
                                     </tr>
 

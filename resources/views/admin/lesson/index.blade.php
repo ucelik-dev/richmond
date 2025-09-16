@@ -64,12 +64,16 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <a href="{{ route('admin.lesson.edit', $lesson->id) }}" class="btn-sm btn-primary me-2 text-decoration-none">
-                                                <i class="fa-solid fa-pen-to-square fa-lg"></i>
-                                            </a>
-                                            <a href="{{ route('admin.lesson.destroy', $lesson->id) }}" class="text-red delete-item text-decoration-none">
-                                                <i class="fa-solid fa-trash-can fa-lg"></i>
-                                            </a>
+                                            @can('edit_admin_lessons')
+                                                <a href="{{ route('admin.lesson.edit', $lesson->id) }}" class="btn-sm btn-primary me-2 text-decoration-none">
+                                                    <i class="fa-solid fa-pen-to-square fa-lg"></i>
+                                                </a>
+                                            @endcan
+                                            @can('edit_admin_lessons')
+                                                <a href="{{ route('admin.lesson.destroy', $lesson->id) }}" class="text-red delete-item text-decoration-none">
+                                                    <i class="fa-solid fa-trash-can fa-lg"></i>
+                                                </a>
+                                            @endcan
                                         </td>
                                     </tr>
 
