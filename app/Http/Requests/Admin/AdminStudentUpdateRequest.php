@@ -21,6 +21,7 @@ class AdminStudentUpdateRequest extends FormRequest
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5000'],
 
             // Personal
+            'college_id' => ['required', 'exists:colleges,id'],
             'name' => ['required', 'string', 'max:255'],
             'gender' => ['required', 'string'],
             'phone' => ['required', 'string', 'max:20'], 

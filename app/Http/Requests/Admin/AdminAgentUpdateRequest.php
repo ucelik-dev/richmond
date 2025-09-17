@@ -21,6 +21,7 @@ class AdminAgentUpdateRequest extends FormRequest
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5000'],
             
             // Personal
+            'college_id' => ['required', 'exists:colleges,id'],
             'name' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:100'], 
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class, 'email')->ignore($this->route('agent'))],

@@ -23,6 +23,30 @@
 
                 <div class="col-12">
                     <div class="row row-cards">
+
+                            <div class="col-sm-6 col-lg-2">
+                                <a href="{{  route('admin.setting-college.index') }}" class="text-decoration-none">
+                                    <div class="card card-sm">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-auto">
+                                                    <span
+                                                        class="btn-default avatar">
+                                                        <i class="fa-solid fa-school"></i>
+                                                    </span>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="font-weight-medium d-flex">
+                                                        <div>
+                                                            Colleges
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
                         
                             <div class="col-sm-6 col-lg-2">
                                 <a href="{{  route('admin.setting-awarding-body.index') }}" class="text-decoration-none">
@@ -32,7 +56,7 @@
                                                 <div class="col-auto">
                                                     <span
                                                         class="btn-default avatar">
-                                                        <i class="fa fa-university"></i>
+                                                        <i class="fa-solid fa-building-columns"></i>
                                                     </span>
                                                 </div>
                                                 <div class="col">

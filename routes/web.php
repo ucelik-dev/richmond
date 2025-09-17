@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\AdminRecruitmentController;
 use App\Http\Controllers\Admin\AdminSettingController;
 use App\Http\Controllers\Admin\AdminStudentController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\Setting\AdminCollegeController;
 use App\Http\Controllers\Admin\Setting\AdminAwardingBodyController;
 use App\Http\Controllers\Admin\Setting\AdminCountryController;
 use App\Http\Controllers\Admin\Setting\AdminCourseCategoryController;
@@ -232,6 +233,7 @@ Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'admin', 'as' =>
     /* Setting Routes */
     Route::group(['middleware' => ['can:index_admin_settings']], function(){
         Route::get('setting', [AdminSettingController::class, 'index'])->name('setting.index');
+        Route::resource('setting-college', AdminCollegeController::class);
         Route::resource('setting-awarding-body', AdminAwardingBodyController::class);
         Route::resource('setting-course-category', AdminCourseCategoryController::class);
         Route::resource('setting-course-level', AdminCourseLevelController::class);

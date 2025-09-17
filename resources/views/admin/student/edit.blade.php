@@ -24,16 +24,30 @@
 
                             {{-- Student info --}}
 
-                            <div class="row">
-                                <div class="col-xl-12">
+                            <div class="row g-3 align-items-stretch">
+                                <div class="col-xl-6">
                                     <div class="general_form_input">
-                                        <label for="#">Image</label><br>
-                                        <img src="{{ asset($student->image) }}"
-                                            style="width: 150px !important; height: 150px !important; object-fit: contain !important; display: inline-block !important;">
-                                        <input type="file" name="image" class="form-control mt-2">
-                                        <x-input-error :messages="$errors->get('image')" class="mt-2 text-danger small" />
+                                    <label>Image</label><br>
+                                    <img src="{{ asset($student->image) }}" style="width: 150px !important; height: 150px !important; object-fit: contain !important; display: inline-block !important;">
+                                    <input type="file" name="image" class="form-control mt-2">
+                                    <x-input-error :messages="$errors->get('image')" class="mt-2 text-danger small" />
                                     </div>
                                 </div>
+
+                                <div class="col-xl-6 d-flex flex-column">
+                                    <div class="general_form_input mt-auto"> 
+                                        <label class="label-required">College</label>
+                                        <select class="form-control form-select" name="college_id">
+                                            @foreach($colleges as $college)
+                                            <option @selected($student->college_id == $college->id) value="{{ $college->id }}">{{ $college->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <x-input-error :messages="$errors->get('college_id')" class="mt-2 text-danger small" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
                                 <div class="col-xl-6">
                                     <div class="general_form_input">
                                         <label for="#" class="label-required">Name</label>

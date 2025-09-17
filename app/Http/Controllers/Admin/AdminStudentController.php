@@ -10,6 +10,7 @@ use App\Mail\StudentAccountCreatedMail;
 use App\Mail\StudentEnrolledMail;
 use App\Models\AwardingBody;
 use App\Models\Batch;
+use App\Models\College;
 use App\Models\Country;
 use App\Models\Course;
 use App\Models\CourseLevel;
@@ -21,8 +22,6 @@ use App\Models\SocialPlatform;
 use App\Models\User;
 use App\Models\UserStatus;
 use App\Traits\FileUpload;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
@@ -54,6 +53,7 @@ class AdminStudentController extends Controller
         $countries = Country::where('status', 1)->orderBy('name')->get();
         $courses = Course::all();
         $roles = Role::all();
+        $colleges = College::where('status', 1)->get();
         $awardingBodies = AwardingBody::where('status', 1)->get();
         
         $salesUsers = User::whereHas('mainRoleRelation', fn ($q) => $q->where('name', 'sales'))
@@ -78,7 +78,7 @@ class AdminStudentController extends Controller
         $documentCategories = DocumentCategory::where(['role_id' => 2, 'status' => 1])->get(); 
         $socialPlatforms = SocialPlatform::where('status', 1)->get();
 
-        return view('admin.student.create', compact('courses','roles','awardingBodies','salesUsers','agentUsers','managerUsers','userStatuses','groups','batches','documentCategories','socialPlatforms','countries','courseLevels'));
+        return view('admin.student.create', compact('courses','roles','colleges','awardingBodies','salesUsers','agentUsers','managerUsers','userStatuses','groups','batches','documentCategories','socialPlatforms','countries','courseLevels'));
     }
 
 
@@ -93,6 +93,7 @@ class AdminStudentController extends Controller
         }
 
         // Assign basic fields
+        $student->college_id = $request->college_id;
         $student->name = $request->name;
         $student->gender = strtolower($request->gender);
         $student->phone = $request->phone;
@@ -301,6 +302,7 @@ class AdminStudentController extends Controller
 
         $countries = Country::where('status', 1)->orderBy('name')->get();
 
+        $colleges = College::where('status', 1)->get();
         $awardingBodies = AwardingBody::where('status', 1)->get();
 
         $salesUsers = User::whereHas('mainRoleRelation', fn ($q) => $q->where('name', 'sales'))
@@ -330,6 +332,7 @@ class AdminStudentController extends Controller
         return view('admin.student.edit', [
             'student' => $student,
             'roles' => Role::all(),
+            'colleges' => $colleges,
             'awardingBodies' => $awardingBodies,
             'salesUsers' => $salesUsers,
             'agentUsers' => $agentUsers,
@@ -449,6 +452,7 @@ class AdminStudentController extends Controller
 
 
         // Update main user fields
+        $student->college_id = $request->college_id;
         $student->name = $request->name;
         $student->gender = strtolower($request->gender);
         $student->phone = $request->phone;
@@ -776,6 +780,7 @@ class AdminStudentController extends Controller
         }
 
         try {
+            $this->deleteFile($student->image);
             $student->delete();
             return response(['status' => 'success', 'message' => 'Student deleted successfully!'], 200);
         } catch (\Exception $e) {

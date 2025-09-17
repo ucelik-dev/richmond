@@ -21,11 +21,23 @@
                             @csrf
 
                             <div class="row">
-                                <div class="col-xl-12">
+                                <div class="col-xl-6">
                                     <div class="general_form_input">
                                         <label for="#">Image</label><br>
-                                        <input type="file" name="image" class="form-control mt-2">
+                                        <input type="file" name="image" class="form-control">
                                         <x-input-error :messages="$errors->get('image')" class="mt-2 text-danger small" />
+                                    </div>
+                                </div>
+                                <div class="col-xl-6">
+                                    <div class="general_form_input"> 
+                                        <label class="label-required">College</label>
+                                        <select class="form-control form-select" name="college_id">
+                                            <option value="">Select a college</option>
+                                            @foreach($colleges as $college)
+                                                <option value="{{ $college->id }}">{{ $college->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <x-input-error :messages="$errors->get('college_id')" class="mt-2 text-danger small" />
                                     </div>
                                 </div>
                                 <div class="col-xl-6">

@@ -3,27 +3,42 @@
 @section('content')
 <!-- Page header -->
 <div class="page-header d-print-none">
-    <div class="container-xl">
-        <div class="row g-2 align-items-center">
-            <div class="col">
-                <div class="page-pretitle">
-                    Richmond College
-                </div>
-                <h2 class="page-title">Dashboard</h2>
-            </div>
-            <div class="col-auto ms-auto d-print-none">
-                <form method="GET" action="{{ route('admin.dashboard') }}">
-                    <div class="d-flex align-items-center gap-2">
-                        <input type="date" name="start_date" class="form-control" style="max-width: 180px;" value="{{ request('start_date') }}">
-                        <input type="date" name="end_date" class="form-control" style="max-width: 180px;" value="{{ request('end_date') }}">
-                        <button class="btn btn-default">Apply</button>
-                        <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">Clear</a>
-                    </div>
-                </form>
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <!-- Title: full width on mobile, flex on md+ -->
+      <div class="col-12 col-md">
+            <div class="d-flex flex-column align-items-center align-items-md-start">
+                <div class="page-pretitle mb-1">Richmond College</div>
+                <h2 class="page-title mb-2 mb-md-0">Dashboard</h2>
             </div>
         </div>
+
+
+      <!-- Filters: full width on mobile, right-aligned on md+ -->
+      <div class="col-12 col-md-auto ms-md-auto mt-0 mt-md-0 d-print-none">
+        <form method="GET" action="{{ route('admin.dashboard') }}">
+          <div class="row g-2 align-items-center">
+            <div class="col-12 col-md-auto">
+              <input type="date" name="start_date" class="form-control filter-input"
+                     value="{{ request('start_date') }}">
+            </div>
+            <div class="col-12 col-md-auto">
+              <input type="date" name="end_date" class="form-control filter-input"
+                     value="{{ request('end_date') }}">
+            </div>
+            <div class="col-12 col-md-auto">
+              <button class="btn btn-default w-100">Apply</button>
+            </div>
+            <div class="col-12 col-md-auto">
+              <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary w-100">Clear</a>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
+
 
 <!-- Page body -->
 <div class="page-body">
@@ -36,7 +51,7 @@
                 <div class="row row-cards">
 
                     {{-- Student Statuses --}}
-                    <div class="col-sm-6 col-lg-2">
+                    <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-2">
                         <div class="card card-sm">
                             <div class="card-body">
                                 <div class="row align-items-center">
@@ -62,7 +77,7 @@
                     </div>
 
                     {{-- Student Registrations --}}
-                    <div class="col-sm-6 col-lg-2">
+                    <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-2">
                         <div class="card card-sm">
                             <div class="card-body">
                                 <div class="row align-items-center">
@@ -98,7 +113,7 @@
                     </div>
 
                     {{-- Student Payments --}}
-                    <div class="col-sm-6 col-lg-2">
+                    <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-2">
                         <div class="card card-sm">
                             <div class="card-body">
                                 <div class="row align-items-center">
@@ -134,7 +149,7 @@
                     </div>
 
                     {{-- Commissions --}}
-                    <div class="col-sm-6 col-lg-2">
+                    <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-2">
                         <div class="card card-sm">
                             <div class="card-body">
                                 <div class="row align-items-center">
@@ -169,7 +184,7 @@
                     </div>
 
                     {{-- Expenses --}}
-                    <div class="col-sm-6 col-lg-2">
+                    <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-2">
                         <div class="card card-sm">
                             <div class="card-body">
                                 <div class="row align-items-center">
@@ -204,7 +219,7 @@
                     </div>
 
                     {{-- Incomes --}}
-                    <div class="col-sm-6 col-lg-2">
+                    <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-2">
                         <div class="card card-sm">
                             <div class="card-body">
                                 <div class="row align-items-center">

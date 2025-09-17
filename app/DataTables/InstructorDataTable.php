@@ -26,6 +26,18 @@ class InstructorDataTable extends DataTable
                 return '<div class="table-avatar"><img src="'.$src.'" alt="" loading="lazy"></div>';
             })
 
+            ->addColumn('college', fn($row) => e($row->college_name ?? ''))
+
+            ->filterColumn('college', function ($q, $kw) {
+                $kw = trim($kw);
+                if ($kw === '') return;
+
+                // allow searching by name or code
+                $q->where(function ($w) use ($kw) {
+                    $w->where('colleges.name', 'like', "%{$kw}%");
+                });
+            })
+
             ->editColumn('email', function ($row) {
                 $e1 = trim((string) $row->email);
                 $e2 = trim((string) $row->contact_email);
@@ -212,8 +224,10 @@ class InstructorDataTable extends DataTable
             DB::raw("DATE_FORMAT(users.created_at, '%Y-%m-%d') AS registered_text"),
             'user_statuses.name  as user_status',
             'user_statuses.color as user_status_color',
+            'colleges.name as college_name', 
         ])
         ->leftJoin('user_statuses','user_statuses.id','=','users.user_status_id')
+        ->leftJoin('colleges', 'colleges.id', '=', 'users.college_id')
 
         // ⬇️ main role MUST be instructor (this automatically excludes admins)
         ->whereHas('mainRoleRelation', function ($q) {
@@ -361,6 +375,7 @@ class InstructorDataTable extends DataTable
         return [
             Column::make('id')->title('ID')->width(40),
             Column::computed('image')->title('Image')->exportable(false)->printable(false)->orderable(false)->searchable(false)->width(60),
+            Column::computed('college')->title('College')->name('colleges.name')->orderable(false)->searchable(true),
             Column::make('name')->title('Name')->name('users.name')->orderable(false),
             Column::make('email')->title('Email')->name('users.email')->orderable(false),
             Column::make('phone')->title('Phone')->name('users.phone')->orderable(false),

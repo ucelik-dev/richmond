@@ -6,6 +6,7 @@ use App\DataTables\AgentDataTable;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AdminAgentCreateRequest;
 use App\Http\Requests\Admin\AdminAgentUpdateRequest;
+use App\Models\College;
 use App\Models\Country;
 use App\Models\DocumentCategory;
 use App\Models\Role;
@@ -36,7 +37,8 @@ class AdminAgentController extends Controller
         $documentCategories = DocumentCategory::where(['role_id' => 4, 'status' => 1])->get(); 
         $socialPlatforms = SocialPlatform::where('status', 1)->get();
         $userStatuses = UserStatus::where('status', 1)->orderBy('name', 'ASC')->get();
-        return view ('admin.agent.create', compact('documentCategories','socialPlatforms','countries','userStatuses'));
+        $colleges = College::where('status', 1)->get();
+        return view ('admin.agent.create', compact('documentCategories','socialPlatforms','countries','userStatuses','colleges'));
     }
 
     public function store(AdminAgentCreateRequest $request)
@@ -50,6 +52,7 @@ class AdminAgentController extends Controller
         }
 
         // Assign basic fields
+        $agent->college_id = $request->college_id;
         $agent->name = $request->name;
         $agent->phone = $request->phone;
         $agent->email = $request->email;
@@ -154,12 +157,13 @@ class AdminAgentController extends Controller
         $documentCategories = DocumentCategory::where(['role_id' => 4, 'status' => 1])->get();  
         $socialPlatforms = SocialPlatform::where('status', 1)->get();
         $userStatuses = UserStatus::where('status', 1)->orderBy('name', 'ASC')->get();
+        $colleges = College::where('status', 1)->get();
         $isAgent = $agent->roles()
             ->wherePivot('is_main', true)
             ->where('role_id', 4)
             ->exists();
 
-        return view('admin.agent.edit', compact('agent','documentCategories','socialPlatforms','countries','userStatuses','isAgent'));
+        return view('admin.agent.edit', compact('agent','documentCategories','socialPlatforms','countries','userStatuses','isAgent','colleges'));
     }
 
     public function update(AdminAgentUpdateRequest $request, User $agent)
@@ -284,7 +288,7 @@ class AdminAgentController extends Controller
             $agent->userNotes()->delete();
         }
 
-
+        $agent->college_id = $request->college_id;
         $agent->name = $request->name;
         $agent->phone = $request->phone;
         $agent->email = $request->email;
@@ -344,6 +348,7 @@ class AdminAgentController extends Controller
         }
 
         try {
+            $this->deleteFile($agent->image);
             $agent->delete();
             return response(['status' => 'success', 'message' => 'Agent deleted successfully!'], 200);
         } catch (\Exception $e) {

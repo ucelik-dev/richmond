@@ -6,6 +6,7 @@ use App\DataTables\InstructorDataTable;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AdminInstructorCreateRequest;
 use App\Http\Requests\Admin\AdminInstructorUpdateRequest;
+use App\Models\College;
 use App\Models\Country;
 use App\Models\DocumentCategory;
 use App\Models\Role;
@@ -43,7 +44,8 @@ class AdminInstructorController extends Controller
         $socialPlatforms = SocialPlatform::where('status', 1)->get();
         $countries = Country::where('status', 1)->orderBy('name')->get();
         $userStatuses = UserStatus::where('status', 1)->orderBy('name', 'ASC')->get();
-        return view ('admin.instructor.create',compact('documentCategories','socialPlatforms','countries','userStatuses'));
+        $colleges = College::where('status', 1)->get();
+        return view ('admin.instructor.create',compact('documentCategories','socialPlatforms','countries','userStatuses','colleges'));
     }
 
     public function store(AdminInstructorCreateRequest $request)
@@ -57,6 +59,7 @@ class AdminInstructorController extends Controller
         }
 
         // Assign basic fields
+        $instructor->college_id = $request->college_id;
         $instructor->name = $request->name;
         $instructor->gender = strtolower($request->gender);
         $instructor->phone = $request->phone;
@@ -144,8 +147,9 @@ class AdminInstructorController extends Controller
         $socialPlatforms = SocialPlatform::where('status', 1)->get();
         $countries = Country::where('status', 1)->orderBy('name')->get();
         $userStatuses = UserStatus::where('status', 1)->orderBy('name', 'ASC')->get();
+        $colleges = College::where('status', 1)->get();
 
-        return view('admin.instructor.edit', compact('instructor','documentCategories','socialPlatforms','countries','userStatuses'));
+        return view('admin.instructor.edit', compact('instructor','documentCategories','socialPlatforms','countries','userStatuses','colleges'));
     }
 
     public function update(AdminInstructorUpdateRequest $request, User $instructor)
@@ -269,7 +273,7 @@ class AdminInstructorController extends Controller
             $instructor->userNotes()->delete();
         }
 
-
+        $instructor->college_id = $request->college_id;
         $instructor->name = $request->name;
         $instructor->gender = strtolower($request->gender);
         $instructor->phone = $request->phone;
@@ -318,6 +322,7 @@ class AdminInstructorController extends Controller
         }
 
         try {
+            $this->deleteFile($instructor->image);
             $instructor->delete();
             return response(['status' => 'success', 'message' => 'Instructor deleted successfully!'], 200);
         } catch (\Exception $e) {

@@ -25,6 +25,18 @@ class StudentDataTable extends DataTable
                 return '<div class="table-avatar"><img src="'.$src.'" alt="img" loading="lazy"></div>';
             })
 
+            ->addColumn('college', fn($row) => e($row->college_name ?? ''))
+
+            ->filterColumn('college', function ($q, $kw) {
+                $kw = trim($kw);
+                if ($kw === '') return;
+
+                // allow searching by name or code
+                $q->where(function ($w) use ($kw) {
+                    $w->where('colleges.name', 'like', "%{$kw}%");
+                });
+            })
+
             ->addColumn('registration_block', function ($row) {
                 $html  = '';
 
@@ -74,6 +86,14 @@ class StudentDataTable extends DataTable
                         . e($name)
                         . '</span>';
                 })->implode('<br>');
+            })
+
+            ->addColumn('group_instructors', function ($row) {
+                if (!$row->relationLoaded('enrollments')) return '';
+                return $row->enrollments
+                    ->filter(fn($en) => $en->group && $en->group->instructor)
+                    ->map(fn($en) => '<span class="align-self-start mb-1">'.e($en->group->instructor->name ?? '—').'</span>')
+                    ->implode('<br>');
             })
 
             // BATCHES (one badge per enrollment; remove underscores)
@@ -213,6 +233,25 @@ class StudentDataTable extends DataTable
                 });
             })
 
+            ->filterColumn('group_instructors', function ($q, $kw) {
+                $kw = trim($kw);
+                if ($kw === '') return;
+
+                $q->where(function ($w) use ($kw) {
+                    // match by instructor name
+                    $w->whereHas('enrollments.group.instructor', function ($tq) use ($kw) {
+                        $tq->where('users.name', 'like', "%{$kw}%");
+                    });
+
+                    // if numeric, also allow exact ID match
+                    if (ctype_digit($kw)) {
+                        $w->orWhereHas('enrollments.group.instructor', function ($tq) use ($kw) {
+                            $tq->where('users.id', (int) $kw);
+                        });
+                    }
+                });
+            })
+
             ->filterColumn('batches', function ($q, $kw) {
                 $kw = trim($kw);
                 $q->whereHas('enrollments.batch', function ($bq) use ($kw) {
@@ -243,7 +282,7 @@ class StudentDataTable extends DataTable
             ->rawColumns([
                 'image', 'registration_block',
                 'courses','groups','batches', 'account_status', 'awarding_body_col', 'awarding_data_col',
-                'account_status','user_status','roles_badges','action'
+                'account_status','user_status','roles_badges','action','group_instructors'
             ])
             ->setRowId('id');
     }
@@ -266,13 +305,16 @@ class StudentDataTable extends DataTable
             'user_statuses.name  as user_status_name',
             'user_statuses.color as user_status_color',
             'countries.name as country_name',
+            'colleges.name as college_name',
         ])
         ->leftJoin('user_statuses','user_statuses.id','=','users.user_status_id')
         ->leftJoin('countries', 'countries.id', '=', 'users.country_id')
+        ->leftJoin('colleges', 'colleges.id', '=', 'users.college_id') 
         ->with([
             'country:id,name',
             'enrollments.course.level',
-            'enrollments.group:id,name,color',
+            'enrollments.group:id,name,color,instructor_id', 
+            'enrollments.group.instructor:id,name',
             'enrollments.batch:id,name,color',
             'awardingBodyRegistrations.awardingBody:id,name',
             'awardingBodyRegistrations.registrationLevel:id,name',
@@ -416,15 +458,17 @@ class StudentDataTable extends DataTable
         return [
             Column::make('id')->title('ID')->width(50),
             Column::computed('image')->title('Image')->exportable(false)->printable(false)->orderable(false)->searchable(false)->width(64),
+            Column::computed('college')->title('College')->name('colleges.name')->orderable(false)->searchable(true),
             Column::make('name')->title('Name')->orderable(false)->searchable(true),
             Column::computed('country')->title('Country')->name('countries.name')->orderable(false)->searchable(true)->visible(false),
             Column::computed('registration_block')->title('Registration Info')->orderable(false)->searchable(true)->visible(false)->addClass('text-nowrap'),
-            Column::computed('email')->title('Email')->orderable(false)->searchable(true),
+            Column::computed('email')->title('Email')->orderable(false)->searchable(true)->visible(false),
             Column::computed('contact_email')->title('Contact Email')->orderable(false)->searchable(true)->visible(false),
             Column::make('phone')->title('Phone')->orderable(false)->searchable(true)->visible(false),
             Column::computed('courses')->title('Courses')->orderable(false)->searchable(true),
             Column::computed('groups')->title('Group')->orderable(false)->searchable(true),
             Column::computed('batches')->title('Batch')->orderable(false)->searchable(true),
+            Column::computed('group_instructors')->title('Instructor')->orderable(false)->searchable(true)->addClass('text-nowrap'),
             Column::computed('account_status')->title('Account Status')->name('users.account_status')->orderable(false)->searchable(true),
             Column::computed('user_status')->title('User Status')->name('user_statuses.name')->orderable(false)->searchable(true),
             Column::make('registered_text')->title('Registration')->name('users.created_at')->orderable(true)->searchable(true),

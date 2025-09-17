@@ -40,21 +40,6 @@ class PaymentDataTable extends DataTable
                 $q->orderBy('users.created_at', $dir)
             )
 
-
-            
-
-            
-
-
-            
-
-
-
-
-
-
-
-
             // COURSES badge(s)
             ->addColumn('courses_badges', function ($row) {
                 // If you have ONE course_id on payments
@@ -108,45 +93,68 @@ class PaymentDataTable extends DataTable
                 }
 
                 $badges = $row->commissions->map(function ($c) {
-                    $user = $c->user;
+                    $user = $c->user; // may be null if user_id is null/missing
 
-                    // MAIN role name from pivot (collection; take the first)
-                    $main = $user?->mainRoleRelation?->first();
-                    $roleName = $main?->name;
-
-                    // Fallback to the first role if no main role flagged
-                    if (!$roleName && $user && $user->relationLoaded('roles')) {
-                        $roleName = optional($user->roles->first())->name;
+                    // Role label
+                    $roleName = null;
+                    if ($user) {
+                        $main = $user?->mainRoleRelation?->first();
+                        $roleName = $main?->name;
+                        if (!$roleName && $user->relationLoaded('roles')) {
+                            $roleName = optional($user->roles->first())->name;
+                        }
+                    } else {
+                        $roleName = 'External'; // shown when there is no user
                     }
 
-                    $userName = e($user?->name ?? 'User');
+                    // Name: user name OR payee_name
+                    $userName = e($user?->name ?: ($c->payee_name ?: 'Unknown'));
 
                     // Paid/unpaid -> choose color
-                    $status = strtolower((string) $c->status);   // e.g. "paid" / "unpaid"
+                    $status = strtolower((string) $c->status);   // "paid" / "unpaid"
                     $class  = $status === 'paid' ? 'success' : 'danger';
 
-                    return '<span class="mb-1 badge bg-'.$class.' text-'.$class.'-fg">'
-                        . e(ucwords($roleName)) . ' : ' . $userName . ' : ' . currency_format($c->amount)
-                        . '</span><br>';
+                    // Build label cleanly (no leading/trailing " : ")
+                    $label = implode(' : ', array_filter([ucwords($roleName), $userName, currency_format($c->amount)]));
+
+                    return '<span class="mb-1 badge bg-'.$class.' text-'.$class.'-fg">'.$label.'</span><br>';
                 })->implode(' ');
 
                 return $badges ?: 'No commissions';
             })
 
-            ->filterColumn('commissions_summary', function ($q, $keyword) {
-                $keyword = trim($keyword);
 
-                $q->where(function ($w) use ($keyword) {
-                    // match commission user's name
+            ->filterColumn('commissions_summary', function ($q, $keyword) {
+                $keyword  = trim($keyword);
+                if ($keyword === '') return;
+
+                $kwLower = mb_strtolower($keyword, 'UTF-8');
+
+                $q->where(function ($w) use ($keyword, $kwLower) {
+                    // User name
                     $w->whereHas('commissions.user', function ($uq) use ($keyword) {
                         $uq->where('name', 'like', "%{$keyword}%");
                     })
-                    // or match the commission user's MAIN role name
+                    // Main role name (Agent, Sales, etc.)
                     ->orWhereHas('commissions.user.mainRoleRelation', function ($rq) use ($keyword) {
                         $rq->where('name', 'like', "%{$keyword}%");
+                    })
+                    // External payee name text
+                    ->orWhereHas('commissions', function ($cq) use ($keyword) {
+                        $cq->where('payee_name', 'like', "%{$keyword}%");
                     });
+
+                    // If searching "external", also match commissions with no user
+                    if (strpos($kwLower, 'external') !== false) {
+                        $w->orWhereHas('commissions', function ($cq) {
+                            $cq->whereNull('user_id')
+                            ->orWhere('user_id', 0); // safety if 0 is ever used
+                        });
+                    }
                 });
             })
+
+
 
             // STATUS badge
             ->editColumn('status_name', function ($row) {
@@ -187,13 +195,9 @@ class PaymentDataTable extends DataTable
             ->with([
                 'installments:id,payment_id,amount,due_date,status,paid_at',
 
-                // all commissions for the payment
-                'commissions:id,payment_id,user_id,amount,status,paid_at',
-
-                // the commission owner (user) + their MAIN role
+                'commissions:id,payment_id,user_id,payee_name,amount,status,paid_at',
                 'commissions.user:id,name',
-                'commissions.user.mainRoleRelation:id,name',   // <-- pulls the main role name only
-                // (optional fallback) first role if main not set:
+                'commissions.user.mainRoleRelation:id,name',
                 'commissions.user.roles:id,name',
 
             ])

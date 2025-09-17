@@ -28,6 +28,18 @@ class ManagerDataTable extends DataTable
                 return '<div class="table-avatar"><img src="'.$src.'" alt="img" loading="lazy"></div>';
             })
 
+            ->addColumn('college', fn($row) => e($row->college_name ?? ''))
+
+            ->filterColumn('college', function ($q, $kw) {
+                $kw = trim($kw);
+                if ($kw === '') return;
+
+                // allow searching by name or code
+                $q->where(function ($w) use ($kw) {
+                    $w->where('colleges.name', 'like', "%{$kw}%");
+                });
+            })
+
             ->editColumn('email', function ($row) {
                 $e1 = trim((string) $row->email);
                 $e2 = trim((string) $row->contact_email);
@@ -125,13 +137,15 @@ class ManagerDataTable extends DataTable
                 DB::raw("DATE_FORMAT(users.created_at, '%Y-%m-%d') AS registered_text"),
                 'user_statuses.name  as user_status_name',
                 'user_statuses.color as user_status_color',
+                'colleges.name as college_name', 
             ])
             // only MANAGERS with MAIN role
             ->whereHas('roles', function ($r) {
                 $r->where('roles.name', 'manager')
                   ->where('user_roles.is_main', 1); // change pivot/table/column name if yours differs
             })
-            ->leftJoin('user_statuses','user_statuses.id','=','users.user_status_id');
+            ->leftJoin('user_statuses','user_statuses.id','=','users.user_status_id')
+            ->leftJoin('colleges', 'colleges.id', '=', 'users.college_id');
     }
 
     public function html(): HtmlBuilder
@@ -254,6 +268,7 @@ class ManagerDataTable extends DataTable
         return [
             Column::make('id')->title('ID')->name('users.id')->width(50),
             Column::computed('image')->title('Image')->exportable(false)->printable(false)->orderable(false)->searchable(false)->width(60),
+            Column::computed('college')->title('College')->name('colleges.name')->orderable(false)->searchable(true),
             Column::make('name')->title('Name')->name('users.name')->orderable(true)->searchable(true),
             Column::make('email')->title('Email')->name('users.email')->orderable(false)->searchable(true),
             Column::make('phone')->title('Phone')->name('users.phone')->orderable(false)->searchable(true),

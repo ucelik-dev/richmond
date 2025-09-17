@@ -19,6 +19,7 @@ class AdminUserUpdateRequest extends FormRequest
     {
         return [
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5000'],
+            'college_id' => ['required', 'exists:colleges,id'],
             
             // Roles
             'main_role_id' => ['required','integer','exists:roles,id', Rule::in($this->input('roles', [])), ],

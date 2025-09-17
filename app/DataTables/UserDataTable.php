@@ -31,7 +31,17 @@ class UserDataTable extends DataTable
                         </div>';
             })
 
-            
+            ->addColumn('college', fn($row) => e($row->college_name ?? ''))
+
+            ->filterColumn('college', function ($q, $kw) {
+                $kw = trim($kw);
+                if ($kw === '') return;
+
+                // allow searching by name or code
+                $q->where(function ($w) use ($kw) {
+                    $w->where('colleges.name', 'like', "%{$kw}%");
+                });
+            })
 
             // COURSES (title + level)
             ->addColumn('courses', function ($row) {
@@ -108,7 +118,7 @@ class UserDataTable extends DataTable
                 }
                 if (Auth::user()->can('delete_admin_users')) {
                     $btns .= '<a href="'.route('admin.user.destroy', $row->id).'"
-                               class="text-red delete-item text-decoration-none">
+                               class="text-red delete-item text-decoration-none me-2">
                                <i class="fa-solid fa-trash-can fa-lg"></i></a>';
                 }
                 if (Auth::user()->can('impersonate-users')) {
@@ -195,8 +205,10 @@ class UserDataTable extends DataTable
                 DB::raw("DATE_FORMAT(users.created_at, '%Y-%m-%d') AS registered_text"),
                 'user_statuses.name  as user_status_name',
                 'user_statuses.color as user_status_color',
+                'colleges.name as college_name',
             ])
             ->leftJoin('user_statuses','user_statuses.id','=','users.user_status_id')
+            ->leftJoin('colleges', 'colleges.id', '=', 'users.college_id')
             ->with([
                 'enrollments.course.level',
                 'enrollments.batch',
@@ -367,8 +379,9 @@ class UserDataTable extends DataTable
         return [
             Column::make('id')->title('id')->width(40)->searchable(true),
             Column::computed('image')->title('Image')->exportable(false)->printable(false)->orderable(false)->searchable(false)->width(60)->visible(false),
+            Column::computed('college')->title('College')->name('colleges.name')->orderable(false)->searchable(true),
             Column::make('name')->title('Name')->name('users.name')->orderable(false)->searchable(true)->addClass('text-nowrap'),
-            Column::make('email')->title('Email')->name('users.email')->orderable(false)->searchable(true),
+            Column::make('email')->title('Email')->name('users.email')->orderable(false)->searchable(true)->visible(false),
             Column::computed('contact_email')->title('Contact Email')->orderable(false)->searchable(true)->visible(false),
             Column::make('phone')->title('Phone')->name('users.phone')->orderable(false)->searchable(true),
             Column::computed('courses')->title('Courses')->orderable(false)->searchable(true),

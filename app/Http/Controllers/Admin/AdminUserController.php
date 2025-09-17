@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\AdminUserCreateRequest;
 use App\Http\Requests\Admin\AdminUserUpdateRequest;
 use App\Models\AwardingBody;
 use App\Models\Batch;
+use App\Models\College;
 use App\Models\Country;
 use App\Models\Course;
 use App\Models\CourseLevel;
@@ -38,6 +39,7 @@ class AdminUserController extends Controller
         $roles = Role::all();
         $awardingBodies = AwardingBody::where('status', 1)->get();
         $countries = Country::where('status', 1)->orderBy('name')->get();
+        $colleges = College::where('status', 1)->get();
 
         $salesUsers = User::whereHas('mainRoleRelation', fn ($q) => $q->where('name', 'sales'))
             ->where('account_status', 1)
@@ -60,7 +62,7 @@ class AdminUserController extends Controller
         $documentCategories = DocumentCategory::where('status', 1)->get(); 
         $socialPlatforms = SocialPlatform::where('status', 1)->get();
 
-        return view('admin.user.create', compact('courses','roles','awardingBodies','salesUsers','agentUsers','managerUsers','userStatuses','groups','batches','documentCategories','socialPlatforms','countries'));
+        return view('admin.user.create', compact('courses','roles','awardingBodies','colleges','salesUsers','agentUsers','managerUsers','userStatuses','groups','batches','documentCategories','socialPlatforms','countries'));
     }
 
     public function store(AdminUserCreateRequest $request)  
@@ -73,6 +75,7 @@ class AdminUserController extends Controller
         }
 
         // Assign base data
+        $user->college_id = $request->college_id;
         $user->name = $request->name;
         $user->gender = strtolower($request->gender);
         $user->phone = $request->phone;
@@ -208,6 +211,7 @@ class AdminUserController extends Controller
 
         $awardingBodies = AwardingBody::where('status', 1)->get();
         $countries = Country::where('status', 1)->orderBy('name')->get();
+        $colleges = College::where('status', 1)->get();
 
         $salesUsers = User::whereHas('mainRoleRelation', fn ($q) => $q->where('name', 'sales'))
             ->where('account_status', 1)
@@ -255,6 +259,7 @@ class AdminUserController extends Controller
             'socialPlatforms' => $socialPlatforms,
             'countries' => $countries,
             'isAgent' => $isAgent,
+            'colleges' => $colleges,
         ]);
     }
 
@@ -410,6 +415,7 @@ class AdminUserController extends Controller
 
 
         // Update main user fields
+        $user->college_id = $request->college_id;
         $user->name = $request->name;
         $user->gender = strtolower($request->gender);
         $user->phone = $request->phone;
@@ -605,6 +611,7 @@ class AdminUserController extends Controller
         }
 
         try {
+            $this->deleteFile($user->image);
             $user->delete();
             return response(['status' => 'success', 'message' => 'User deleted successfully!'], 200);
         } catch (\Exception $e) {

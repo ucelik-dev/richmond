@@ -6,10 +6,10 @@ use App\DataTables\ManagerDataTable;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AdminManagerCreateRequest;
 use App\Http\Requests\Admin\AdminManagerUpdateRequest;
+use App\Models\College;
 use App\Models\Country;
 use App\Models\DocumentCategory;
 use App\Models\Role;
-use App\Models\SocialPlatform;
 use App\Models\User;
 use App\Models\UserStatus;
 use App\Traits\FileUpload;
@@ -35,7 +35,8 @@ class AdminManagerController extends Controller
         $documentCategories = DocumentCategory::where(['role_id' => 9, 'status' => 1])->get(); 
         $countries = Country::where('status', 1)->orderBy('name')->get();
         $userStatuses = UserStatus::where('status', 1)->orderBy('name', 'ASC')->get();
-        return view ('admin.manager.create', compact('documentCategories','countries','userStatuses'));
+        $colleges = College::where('status', 1)->get();
+        return view ('admin.manager.create', compact('documentCategories','countries','userStatuses','colleges'));
     }
 
     public function store(AdminManagerCreateRequest $request)
@@ -49,6 +50,7 @@ class AdminManagerController extends Controller
         }
 
         // Assign basic fields
+        $manager->college_id = $request->college_id;
         $manager->name = $request->name;
         $manager->gender = strtolower($request->gender);
         $manager->phone = $request->phone;
@@ -123,8 +125,9 @@ class AdminManagerController extends Controller
         $documentCategories = DocumentCategory::where(['role_id' => 9, 'status' => 1])->get(); 
         $countries = Country::where('status', 1)->orderBy('name')->get();
         $userStatuses = UserStatus::where('status', 1)->orderBy('name', 'ASC')->get();
+        $colleges = College::where('status', 1)->get();
 
-        return view('admin.manager.edit', compact('manager','documentCategories','countries','userStatuses'));
+        return view('admin.manager.edit', compact('manager','documentCategories','countries','userStatuses','colleges'));
     }
 
     public function update(AdminManagerUpdateRequest $request, User $manager)
@@ -212,7 +215,7 @@ class AdminManagerController extends Controller
             $manager->userNotes()->delete();
         }
 
-
+        $manager->college_id = $request->college_id;
         $manager->name = $request->name;
         $manager->gender = strtolower($request->gender);
         $manager->phone = $request->phone;
@@ -255,6 +258,7 @@ class AdminManagerController extends Controller
         }
 
         try {
+            $this->deleteFile($manager->image);
             $manager->delete();
             return response(['status' => 'success', 'message' => 'Manager deleted successfully!'], 200);
         } catch (\Exception $e) {
