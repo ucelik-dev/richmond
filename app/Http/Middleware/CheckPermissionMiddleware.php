@@ -9,15 +9,16 @@ use Illuminate\Support\Facades\Auth;
 
 class CheckPermissionMiddleware
 {
-    public function handle(Request $request, Closure $next, string $permission)
+    public function handle(Request $request, Closure $next, string $arg1, ?string $arg2 = null)
     {
-        $user = Auth::user();
+        $user = $request->user();
+        abort_unless($user, 403);
 
-        if ($user && $user->hasPermission($permission)) {
-            return $next($request);
-        }
+        $ok = $arg2
+            ? $user->canResource($arg1, $arg2)  // perm:resource,ability
+            : $user->hasPermission($arg1);      // legacy: perm:ability_resource
 
-        // You can customize the unauthorized response
-        return abort(403, 'Unauthorized action.');
+        abort_unless($ok, 403, 'Unauthorized action.');
+        return $next($request);
     }
 }

@@ -44,9 +44,6 @@ class AdminUserPermissionController extends Controller
         return redirect()->route('admin.setting-user-permission.index');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         //

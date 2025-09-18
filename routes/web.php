@@ -165,74 +165,78 @@ Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'agent', 'as' =>
 
 
 /* Admin Routes */
+Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'admin', 'as' => 'admin.'], function () {
 
-Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'admin', 'as' => 'admin.'], function(){    
-    
+    // Dashboard (role-gated, as before)
     Route::middleware(['role:admin,manager,sales'])->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     });
 
-    Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit')->middleware('can:view_admin_profile');
-    Route::put('/profile', [AdminProfileController::class, 'update'])->name('profile.update')->middleware('can:edit_admin_profile');
+    // Profile
+    Route::get('/profile', [AdminProfileController::class, 'edit'])
+        ->name('profile.edit')->middleware('permission:admin_profile,view');
+    Route::put('/profile', [AdminProfileController::class, 'update'])
+        ->name('profile.update')->middleware('permission:admin_profile,edit');
 
     /* User Routes */
-    Route::resource('user', AdminUserController::class)->middleware('can:index_admin_payments');
-    // New routes for managing user permissions
-    Route::get('user/{user}/permission', [AdminUserController::class, 'editPermissions'])->name('user.permission.edit');
-    Route::put('user/{user}/permission', [AdminUserController::class, 'updatePermissions'])->name('user.permission.update');
+    Route::resource('user', AdminUserController::class)
+        ->middleware('permission:admin_users,view');
+    // user permission editor
+    Route::get('user/{user}/permission', [AdminUserController::class, 'editPermissions'])
+        ->name('user.permission.edit')->middleware('permission:admin_users,edit');
+    Route::put('user/{user}/permission', [AdminUserController::class, 'updatePermissions'])
+        ->name('user.permission.update')->middleware('permission:admin_users,edit');
 
-
-    
     /* Student Routes */
-    Route::resource('student', AdminStudentController::class)->middleware('can:index_admin_students');
+    Route::resource('student', AdminStudentController::class)->middleware('permission:admin_students,view');
 
     /* Instructor Routes */
-    Route::resource('instructor', AdminInstructorController::class)->middleware('can:index_admin_instructors');
+    Route::resource('instructor', AdminInstructorController::class)->middleware('permission:admin_instructors,view');
 
     /* Agent Routes */
-    Route::resource('agent', AdminAgentController::class)->middleware('can:index_admin_agents');
+    Route::resource('agent', AdminAgentController::class)->middleware('permission:admin_agents,view');
 
-    /* Agent Routes */
-    Route::resource('manager', AdminManagerController::class)->middleware('can:index_admin_managers');
+    /* Manager Routes */
+    Route::resource('manager', AdminManagerController::class)->middleware('permission:admin_managers,view');
 
     /* Course Routes */
-    Route::resource('course', AdminCourseController::class)->middleware('can:index_admin_courses');
+    Route::resource('course', AdminCourseController::class)->middleware('permission:admin_courses,view');
 
     /* Module Routes */
-    Route::resource('module', AdminModuleController::class)->middleware('can:index_admin_modules');
+    Route::resource('module', AdminModuleController::class)->middleware('permission:admin_modules,view');
 
     /* Lesson Routes */
-    Route::resource('lesson', AdminLessonController::class)->middleware('can:index_admin_lessons');
+    Route::resource('lesson', AdminLessonController::class)->middleware('permission:admin_lessons,view');
 
     /* Payment Routes */
-    Route::resource('payment', AdminPaymentController::class)->middleware('can:index_admin_payments');
+    Route::resource('payment', AdminPaymentController::class)->middleware('permission:admin_payments,view');
 
     /* Commission Routes */
-    Route::resource('commission', AdminCommissionController::class)->middleware('can:index_admin_commissions');
+    Route::resource('commission', AdminCommissionController::class)->middleware('permission:admin_commissions,view');
 
     /* Expense Routes */
-    Route::resource('expense', AdminExpenseController::class)->middleware('can:index_admin_expenses');
+    Route::resource('expense', AdminExpenseController::class)->middleware('permission:admin_expenses,view');
 
     /* Income Routes */
-    Route::resource('income', AdminIncomeController::class)->middleware('can:index_admin_incomes');
+    Route::resource('income', AdminIncomeController::class)->middleware('permission:admin_incomes,view');
 
     /* Student Recruitment Routes */
-    Route::resource('recruitment', AdminRecruitmentController::class)->middleware('can:index_admin_recruitments');
+    Route::resource('recruitment', AdminRecruitmentController::class)->middleware('permission:admin_recruitments,view');
 
     /* Graduate Routes */
-    Route::resource('graduate', AdminGraduateController::class)->middleware('can:index_admin_graduates');
+    Route::resource('graduate', AdminGraduateController::class)->middleware('permission:admin_graduates,view');
 
-    /* Email Log Routes */
-    Route::group(['middleware' => ['can:index_admin_email_logs']], function(){
+    /* Email Logs */
+    Route::group(['middleware' => ['permission:admin_email_logs,view']], function () {
         Route::get('email-log', [AdminEmailLogController::class, 'index'])->name('email-log.index');
         Route::get('email-log/{id}', [AdminEmailLogController::class, 'show'])->name('email-log.show');
         Route::get('email-log/{emailLog}/inline', [AdminEmailLogController::class, 'inline'])->name('email-log.inline');
     });
-    
 
-    /* Setting Routes */
-    Route::group(['middleware' => ['can:index_admin_settings']], function(){
+    /* Settings (gate whole section) */
+    Route::group(['middleware' => ['permission:admin_settings,view']], function () {
         Route::get('setting', [AdminSettingController::class, 'index'])->name('setting.index');
+
         Route::resource('setting-college', AdminCollegeController::class);
         Route::resource('setting-awarding-body', AdminAwardingBodyController::class);
         Route::resource('setting-course-category', AdminCourseCategoryController::class);
@@ -252,51 +256,37 @@ Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'admin', 'as' =>
         Route::resource('setting-recruitment-status', AdminRecruitmentStatusController::class);
     });
 
+    /* Bulk Email */
+    Route::prefix('bulk-email')->group(function () {
+        Route::get('/',  [AdminBulkEmailController::class, 'create'])
+            ->name('bulk-email.create')->middleware('permission:admin_send_bulk_emails,view');
+        Route::post('/', [AdminBulkEmailController::class, 'store'])
+            ->name('bulk-email.store')->middleware('permission:admin_send_bulk_emails,create');
+    });
 
-     /* Bulk Email (create + send) */
-     //Route::middleware(['can:send-bulk-email']) // adjust to your auth/permission
-    Route::middleware(['can:send_bulk_emails'])
-        ->prefix('bulk-email')
-        ->group(function () {
-            Route::get('/',  [AdminBulkEmailController::class, 'create'])->name('bulk-email.create');
-            Route::post('/', [AdminBulkEmailController::class, 'store'])->name('bulk-email.store');
-        });
-
-    Route::get('email-log/{emailLog}/attachments/{index}', 
+    // Email attachments (keep with email-log permissions)
+    Route::get('email-log/{emailLog}/attachments/{index}',
         [AdminEmailLogController::class, 'downloadAttachment'])
         ->whereNumber('emailLog')->whereNumber('index')
         ->name('email-log.attachment.download')
-        ->middleware('can:index_admin_email_logs'); // adjust permission
-
+        ->middleware('permission:admin_email_logs,view');
 
     // Impersonation (admin only)
-    Route::middleware(['can:impersonate_users'])->group(function () {
-        // 1) One-click from tables: creates token then redirects to start
+    Route::middleware(['permission:admin_impersonate_users,view'])->group(function () {
         Route::get('users/{user}/impersonate', [AdminImpersonationController::class, 'quickStart'])
-            ->whereNumber('user')
-            ->name('impersonate.quick');
+            ->whereNumber('user')->name('impersonate.quick');
 
-        // 2) Manual: create token only (if you still need it anywhere)
         Route::post('users/{user}/impersonate-token', [AdminImpersonationController::class, 'createToken'])
-            ->whereNumber('user')
-            ->name('impersonate.token');
+            ->whereNumber('user')->name('impersonate.token');
 
-        // 3) Consume token & switch session
         Route::get('impersonate/start/{token}', [AdminImpersonationController::class, 'start'])
             ->where('token', '[A-Za-z0-9]{32,128}')
             ->name('impersonate.start');
-
-        
     });
 
-    // 4) Stop impersonating
+    // Stop impersonating
     Route::post('impersonate/stop', [AdminImpersonationController::class, 'stop'])
         ->name('impersonate.stop');
-
-
-
-
-
 });
 
 

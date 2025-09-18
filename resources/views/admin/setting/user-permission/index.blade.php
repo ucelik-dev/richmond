@@ -38,12 +38,12 @@
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped">
                                 <thead>
-                                    <tr>
-                                        <th style="width: 60px;">#</th>
-                                        <th>Permission Name</th>
-                                        <th>Display Name</th>
-                                        <th style="width: 75px;">ACTION</th>
-                                    </tr>
+                                <tr>
+                                    <th style="width:60px;">#</th>
+                                    <th>Permission Name</th>
+                                    <th>Display Name</th>
+                                    <th class="text-center" style="width:95px;">Action</th>
+                                </tr>
                                 </thead>
                                 <tbody>
                                     @forelse ($role->permissions as $permission)
@@ -51,23 +51,26 @@
                                             <td>{{ $loop->iteration }}</td>
                                             <td>{{ $permission->name }}</td>
                                             <td>{{ $permission->display_name }}</td>
-                                            <td class="text-nowrap">
-                                                <a href="{{ route('admin.setting-user-permission.edit', $permission->id) }}" class="btn-sm btn-primary me-2 text-decoration-none">
-                                                    <i class="fa-solid fa-pen-to-square fa-lg"></i>
+                                            <td class="text-center text-nowrap">
+                                                <a href="{{ route('admin.setting-user-permission.edit', $permission->id) }}"
+                                                class="btn-sm btn-primary me-2 text-decoration-none" title="Edit">
+                                                <i class="fa-solid fa-pen-to-square fa-lg"></i>
                                                 </a>
-                                                <a href="{{ route('admin.setting-user-permission.destroy', $permission->id) }}" class="text-red delete-item text-decoration-none">
-                                                    <i class="fa-solid fa-trash-can fa-lg"></i>
+                                                <a href="{{ route('admin.setting-user-permission.destroy', $permission->id) }}"
+                                                class="text-red delete-item text-decoration-none" title="Delete">
+                                                <i class="fa-solid fa-trash-can fa-lg"></i>
                                                 </a>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="4" class="text-muted text-center">No permissions assigned to this role.</td>
+                                        <td colspan="4" class="text-muted text-center">No permissions assigned to this role.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
                             </table>
-                        </div>
+                            </div>
+
                     </div>
                 </div>
             @empty

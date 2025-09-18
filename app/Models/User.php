@@ -57,32 +57,13 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id')->withPivot('is_main');
     }
 
-    /**
-     * The permissions that are directly assigned to the user.
-     */
-    public function directPermissions()
-    {
-        return $this->belongsToMany(Permission::class, 'user_permissions');
-    }
-
     /* Check if the user has a specific role. */
     public function hasRole($role)
     {
         return $this->roles->contains('name', $role);
     }
 
-    /* Check if the user has a specific permission. */
-    public function hasPermission(string $permissionName): bool
-    {
-        // 1. Admins have all permissions.
-        //if ($this->isAdmin()) {
-        //    return true;
-       // }
 
-        // 2. Check for the permission directly in the user_permissions table.
-        // This is now the primary check for all user-specific permissions.
-        return $this->directPermissions()->where('name', $permissionName)->exists();
-    }
 
      /**
      * Helper method to check if the user has the 'admin' role.
@@ -207,6 +188,90 @@ class User extends Authenticatable
     public function manager()
     {
         return $this->belongsTo(User::class, 'manager_id');
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * The permissions that are directly assigned to the user.
+     */
+    public function directPermissions()
+    {
+        return $this->belongsToMany(Permission::class, 'user_permissions')
+            ->withPivot(['can_view','can_create','can_edit','can_delete'])
+            ->withTimestamps();
+    }
+
+    /**
+     * New: check a resource + ability, e.g. ('admin_payments','view')
+     */
+    public function canResource(string $resourceKey, string $ability): bool
+    {
+        $ability = $this->normalizeAbility($ability);             // view|create|edit|delete|export
+        $permId  = Permission::where('name', $resourceKey)->value('id');
+        if (!$permId) return false;
+
+        $col = 'can_'.$ability;
+
+        return $this->directPermissions()
+            ->where('permissions.id', $permId)
+            ->wherePivot($col, true)
+            ->exists();
+    }
+
+    /* Check if the user has a specific permission. */
+    public function hasPermission(string $permissionName): bool
+    {
+        [$ability, $resource] = $this->parsePermissionString($permissionName);
+        if (!$ability || !$resource) return false;
+
+        return $this->canResource($resource, $ability);
+    }
+
+    /* ---------- helpers ---------- */
+
+    private function parsePermissionString(string $str): array
+    {
+        $str = trim($str);
+
+        // new style: "resource,ability" or "resource:ability"
+        if (str_contains($str, ',')) {
+            [$resource, $ability] = array_map('trim', explode(',', $str, 2));
+            return [$this->normalizeAbility($ability), strtolower($resource)];
+        }
+        if (str_contains($str, ':')) {
+            [$resource, $ability] = array_map('trim', explode(':', $str, 2));
+            return [$this->normalizeAbility($ability), strtolower($resource)];
+        }
+
+        // legacy: "ability_resource"
+        if (preg_match('/^(view|create|edit|delete|export|index|show|store|update|destroy|sidebar|manage)_(.+)$/i', $str, $m)) {
+            return [$this->normalizeAbility($m[1]), strtolower($m[2])];
+        }
+
+        return [null, null];
+    }
+
+    private function normalizeAbility(string $a): string
+    {
+        return match (strtolower(trim($a))) {
+            'index','show','sidebar' => 'view',
+            'store','create'         => 'create',
+            'update','edit','manage' => 'edit',
+            'destroy','delete'       => 'delete',
+            default                  => $a,
+        };
     }
 
 

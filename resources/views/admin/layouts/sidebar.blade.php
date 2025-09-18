@@ -25,7 +25,7 @@
                     </a>
                 </li>
 
-                @can('index_admin_payments')
+                @if(auth()->user()?->canResource('admin_payments','view'))
                     <li class="nav-item dropdown">
                         <a class="nav-link {{ setSidebarActive(['admin.payment.*']) }}" href="{{ route('admin.payment.index') }}">
                             <span
@@ -37,9 +37,9 @@
                             </span>
                         </a>
                     </li>
-                @endcan
+                @endif
 
-                @can('index_admin_commissions')
+                @if(auth()->user()?->canResource('admin_commissions','view'))
                     <li class="nav-item dropdown">
                         <a class="nav-link {{ setSidebarActive(['admin.commission.*']) }}" href="{{ route('admin.commission.index') }}">
                             <span
@@ -51,9 +51,9 @@
                             </span>
                         </a>
                     </li>
-                @endcan
+                @endif
 
-                @can('index_admin_expenses')
+                @if(auth()->user()?->canResource('admin_expenses','view'))
                     <li class="nav-item dropdown">
                         <a class="nav-link {{ setSidebarActive(['admin.expense.*']) }}" href="{{ route('admin.expense.index') }}">
                             <span
@@ -65,9 +65,9 @@
                             </span>
                         </a>
                     </li>
-                @endcan
+                @endif
 
-                @can('index_admin_incomes')
+                @if(auth()->user()?->canResource('admin_incomes','view'))
                     <li class="nav-item dropdown">
                         <a class="nav-link {{ setSidebarActive(['admin.income.*']) }}" href="{{ route('admin.income.index') }}">
                             <span
@@ -79,96 +79,94 @@
                             </span>
                         </a>
                     </li>
-                @endcan
+                @endif
 
-                @can('sidebar_admin_user_management')
+                @php
+                    $canUsers       = auth()->user()?->canResource('admin_users','view');
+                    $canStudents    = auth()->user()?->canResource('admin_students','view');
+                    $canInstructors = auth()->user()?->canResource('admin_instructors','view');
+                    $canAgents      = auth()->user()?->canResource('admin_agents','view');
+                    $canManagers    = auth()->user()?->canResource('admin_managers','view');
+                    $showUserManagement   = $canUsers || $canStudents || $canInstructors || $canAgents || $canManagers;
+                @endphp
+
+                @if($showUserManagement)
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {{ setSidebarActive(['admin.user.*','admin.student.*','admin.instructor.*','admin.agent.*','admin.manager.*']) }}" href="#navbar-base" data-bs-toggle="dropdown"
-                            data-bs-auto-close="false" role="button" aria-expanded="false">
-                            <span
-                                class="nav-link-icon d-md-none d-lg-inline-block">
-                                <i class="fa-solid fa-users"></i>
-                            </span>
-                            <span class="nav-link-title">
-                                User Management
-                            </span>
+                        <a class="nav-link dropdown-toggle {{ setSidebarActive(['admin.user.*','admin.student.*','admin.instructor.*','admin.agent.*','admin.manager.*']) }}"
+                        href="#navbar-base" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="false">
+                        <span class="nav-link-icon d-md-none d-lg-inline-block">
+                            <i class="fa-solid fa-users"></i>
+                        </span>
+                        <span class="nav-link-title">User Management</span>
                         </a>
                         <div class="dropdown-menu {{ setSidebarActive(['admin.user.*','admin.student.*','admin.instructor.*','admin.agent.*','admin.manager.*']) }}">
                             <div class="dropdown-menu-columns">
-                                
                                 <div class="dropdown-menu-column">
-                                    @can('index_admin_users')
-                                        <a class="dropdown-item {{ Request::routeIs('admin.user.*') ? 'text-white fw-bold' : '' }}" href="{{ route('admin.user.index') }}">
-                                            Users
-                                        </a>
-                                    @endcan
-                                    @can('index_admin_students')
-                                        <a class="dropdown-item {{ Request::routeIs('admin.student.*') ? 'text-white fw-bold' : '' }}" href="{{ route('admin.student.index') }}">
-                                            Students
-                                        </a>
-                                    @endcan
-                                    @can('index_admin_instructors')
-                                        <a class="dropdown-item {{ Request::routeIs('admin.instructor.*') ? 'text-white fw-bold' : '' }}" href="{{ route('admin.instructor.index') }}">
-                                            Instructors
-                                        </a>
-                                    @endcan
-                                    @can('index_admin_agents')
-                                        <a class="dropdown-item {{ Request::routeIs('admin.agent.*') ? 'text-white fw-bold' : '' }}" href="{{ route('admin.agent.index') }}">
-                                            Agents
-                                        </a>
-                                    @endcan
-                                    @can('index_admin_managers')
-                                        <a class="dropdown-item {{ Request::routeIs('admin.manager.*') ? 'text-white fw-bold' : '' }}" href="{{ route('admin.manager.index') }}">
-                                            Managers
-                                        </a>
-                                    @endcan
-
+                                    @if($canUsers)
+                                        <a class="dropdown-item {{ Request::routeIs('admin.user.*') ? 'text-white fw-bold' : '' }}"
+                                        href="{{ route('admin.user.index') }}">Users</a>
+                                    @endif
+                                    @if($canStudents)
+                                        <a class="dropdown-item {{ Request::routeIs('admin.student.*') ? 'text-white fw-bold' : '' }}"
+                                        href="{{ route('admin.student.index') }}">Students</a>
+                                    @endif
+                                    @if($canInstructors)
+                                        <a class="dropdown-item {{ Request::routeIs('admin.instructor.*') ? 'text-white fw-bold' : '' }}"
+                                        href="{{ route('admin.instructor.index') }}">Instructors</a>
+                                    @endif
+                                    @if($canAgents)
+                                        <a class="dropdown-item {{ Request::routeIs('admin.agent.*') ? 'text-white fw-bold' : '' }}"
+                                        href="{{ route('admin.agent.index') }}">Agents</a>
+                                    @endif
+                                    @if($canManagers)
+                                        <a class="dropdown-item {{ Request::routeIs('admin.manager.*') ? 'text-white fw-bold' : '' }}"
+                                        href="{{ route('admin.manager.index') }}">Managers</a>
+                                    @endif
                                 </div>
-                                
                             </div>
                         </div>
                     </li>
-                @endcan
+                @endif
 
-                @can('sidebar_admin_course_management')
+
+                @php
+                    $canCourses = auth()->user()?->canResource('admin_courses','view');
+                    $canModules = auth()->user()?->canResource('admin_modules','view');
+                    $canLessons = auth()->user()?->canResource('admin_lessons','view');
+                    $showCourseManagement = $canCourses || $canModules || $canLessons;
+                @endphp
+
+                @if($showCourseManagement)
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {{ setSidebarActive(['admin.course.*','admin.module.*','admin.lesson.*']) }}" href="#navbar-base" data-bs-toggle="dropdown"
-                            data-bs-auto-close="false" role="button" aria-expanded="false">
-                            <span
-                                class="nav-link-icon d-md-none d-lg-inline-block">
-                                <i class="fa-solid fa-book"></i>
-                            </span>
-                            <span class="nav-link-title">
-                                Courses Management
-                            </span>
+                        <a class="nav-link dropdown-toggle {{ setSidebarActive(['admin.course.*','admin.module.*','admin.lesson.*']) }}"
+                        href="#navbar-base" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="false">
+                        <span class="nav-link-icon d-md-none d-lg-inline-block">
+                            <i class="fa-solid fa-book"></i>
+                        </span>
+                        <span class="nav-link-title">Courses Management</span>
                         </a>
                         <div class="dropdown-menu {{ setSidebarActive(['admin.course.*','admin.module.*','admin.lesson.*']) }}">
                             <div class="dropdown-menu-columns">
-                                
                                 <div class="dropdown-menu-column">
-                                    @can('index_admin_courses')
-                                        <a class="dropdown-item {{ Request::routeIs('admin.course.*') ? 'text-white fw-bold' : '' }}" href="{{ route('admin.course.index') }}">
-                                            Courses
-                                        </a>
-                                    @endcan
-                                    @can('index_admin_modules')
-                                        <a class="dropdown-item {{ Request::routeIs('admin.module.*') ? 'text-white fw-bold' : '' }}" href="{{ route('admin.module.index') }}">
-                                            Modules
-                                        </a>
-                                    @endcan
-                                    @can('index_admin_lessons')
-                                        <a class="dropdown-item {{ Request::routeIs('admin.lesson.*') ? 'text-white fw-bold' : '' }}" href="{{ route('admin.lesson.index') }}">
-                                            Lessons
-                                        </a>
-                                    @endcan
+                                @if($canCourses)
+                                    <a class="dropdown-item {{ Request::routeIs('admin.course.*') ? 'text-white fw-bold' : '' }}"
+                                    href="{{ route('admin.course.index') }}">Courses</a>
+                                @endif
+                                @if($canModules)
+                                    <a class="dropdown-item {{ Request::routeIs('admin.module.*') ? 'text-white fw-bold' : '' }}"
+                                    href="{{ route('admin.module.index') }}">Modules</a>
+                                @endif
+                                @if($canLessons)
+                                    <a class="dropdown-item {{ Request::routeIs('admin.lesson.*') ? 'text-white fw-bold' : '' }}"
+                                    href="{{ route('admin.lesson.index') }}">Lessons</a>
+                                @endif
                                 </div>
-                                
                             </div>
                         </div>
                     </li>
-                @endcan
+                @endif
 
-                @can('index_admin_recruitments')
+                @if(auth()->user()?->canResource('admin_recruitments','view'))
                     <li class="nav-item dropdown">
                         <a class="nav-link {{ setSidebarActive(['admin.recruitment.*']) }}" href="{{ route('admin.recruitment.index') }}">
                             <span
@@ -180,9 +178,9 @@
                             </span>
                         </a>
                     </li>
-                @endcan
+                @endif
 
-                @can('index_admin_graduates')
+                @if(auth()->user()?->canResource('admin_graduates','view'))
                     <li class="nav-item dropdown">
                         <a class="nav-link {{ setSidebarActive(['admin.graduate.*']) }}" href="{{ route('admin.graduate.index') }}">
                             <span
@@ -194,9 +192,9 @@
                             </span>
                         </a>
                     </li>
-                @endcan
+                @endif
 
-                @can('index_admin_settings')
+                @if(auth()->user()?->canResource('admin_settings','view'))
                     <li class="nav-item dropdown">
                         <a class="nav-link {{ setSidebarActive(['admin.setting.*','admin.setting-*']) }}" href="{{ route('admin.setting.index') }}">
                             <span
@@ -208,9 +206,9 @@
                             </span>
                         </a>
                     </li>
-                @endcan
+                @endif
 
-                @can('send_bulk_emails')
+                @if(auth()->user()?->canResource('admin_send_bulk_emails','view'))
                     <li class="nav-item dropdown">
                         <a class="nav-link {{ setSidebarActive(['admin.bulk-email']) }}" href="{{ route('admin.bulk-email.create') }}">
                             <span
@@ -222,9 +220,9 @@
                             </span>
                         </a>
                     </li>
-                @endcan
+                @endif
 
-                @can('index_admin_email_logs')
+                @if(auth()->user()?->canResource('admin_email_logs','view'))
                     <li class="nav-item dropdown">
                         <a class="nav-link {{ setSidebarActive(['admin.email-log']) }}" href="{{ route('admin.email-log.index') }}">
                             <span
@@ -236,7 +234,7 @@
                             </span>
                         </a>
                     </li>
-                @endcan
+                @endif
 
 
 

@@ -627,24 +627,38 @@ class AdminUserController extends Controller
      */
     protected function attachRolesAndPermissions(User $user, array $roleIds, int $mainRoleId)
     {
-        // First, sync the roles with the user, setting the main role.
+        // 1) Sync roles (with main role flag)
         $pivotData = [];
         foreach ($roleIds as $roleId) {
-            $pivotData[$roleId] = ['is_main' => ($roleId == $mainRoleId)];
+            $pivotData[$roleId] = ['is_main' => ((int)$roleId === (int)$mainRoleId)];
         }
         $user->roles()->sync($pivotData);
 
-        // Fetch all unique permission IDs from the selected roles.
-        $permissions = Role::whereIn('id', $roleIds)
-                            ->with('permissions')
-                            ->get()
-                            ->flatMap(fn ($role) => $role->permissions)
-                            ->pluck('id')
-                            ->unique();
+        // 2) Collect all permission IDs provided by these roles
+        $permIds = Role::whereIn('id', $roleIds)
+            ->with('permissions:id')
+            ->get()
+            ->flatMap->permissions
+            ->pluck('id')
+            ->unique()
+            ->values()
+            ->all();
 
-        // Finally, sync these permissions directly to the user_permissions table.
-        // This removes any old permissions and adds the new ones.
-        $user->directPermissions()->sync($permissions);
+        // 3) Ensure those permissions have can_view = true for this user (preserve other flags)
+        foreach ($permIds as $pid) {
+            $user->directPermissions()->syncWithoutDetaching([
+                $pid => ['can_view' => true],
+            ]);
+        }
+
+        // 4) For permissions no longer covered by the selected roles, turn off "view" only
+        $currentIds = $user->directPermissions()->pluck('permissions.id')->all();
+        $toTurnOff  = array_diff($currentIds, $permIds);
+        foreach ($toTurnOff as $pid) {
+            $user->directPermissions()->updateExistingPivot($pid, ['can_view' => false]);
+            // If you prefer to remove rows entirely when nothing is on, you can detach here
+            // after checking other flags.
+        }
     }
 
 
@@ -655,33 +669,53 @@ class AdminUserController extends Controller
 
     public function editPermissions(User $user)
     {
-        // Get only the roles and their permissions for this specific user
-        $roles = $user->roles()->with('permissions')->get();
+        // Only the user's roles (as your view groups by role)
+        $roles = $user->roles()->with(['permissions' => fn ($q) => $q->orderBy('display_name')])->get();
 
-        // Get the IDs of the permissions the user has directly
-        $userPermissions = $user->directPermissions->pluck('id')->toArray();
-        
-        return view('admin.user.permission.edit', compact('user', 'roles', 'userPermissions'));
+        // Current user overrides keyed by permission_id (so Blade can read pivot flags)
+        $userPerms = $user->directPermissions()->get()->keyBy('id');
+
+        return view('admin.user.permission.edit', compact('user', 'roles', 'userPerms'));
     }
+
 
     public function updatePermissions(Request $request, User $user)
     {
+        // Expect matrix: perm[permission_id][view|create|edit|delete] = 0/1
         $request->validate([
-            'permissions' => 'array',
-            'permissions.*' => 'exists:permissions,id',
+            'permission' => 'array',
+            'permission.*.view'   => 'nullable|boolean',
+            'permission.*.create' => 'nullable|boolean',
+            'permission.*.edit'   => 'nullable|boolean',
+            'permission.*.delete' => 'nullable|boolean',
         ]);
-        
-        // Sync the permissions with the user's direct permissions
-        $user->directPermissions()->sync($request->permissions);
 
-        notyf()->success('User permissions updated successfully!');
-        
-        if ($request->input('action') === 'save_stay') {
-            return redirect()->back();
-        } else {
-            return redirect()->route('admin.user.index');
+        $matrix = $request->input('permission', []);
+
+        foreach ($matrix as $permissionId => $flags) {
+            $payload = [
+                'can_view'   => !empty($flags['view']),
+                'can_create' => !empty($flags['create']),
+                'can_edit'   => !empty($flags['edit']),
+                'can_delete' => !empty($flags['delete']),
+            ];
+
+            // Upsert this (user, permission) row with booleans
+            $user->directPermissions()->syncWithoutDetaching([
+                (int)$permissionId => $payload,
+            ]);
+
+            // Optional tidy-up: detach row if all flags are off
+            if (!array_sum($payload)) {
+                $user->directPermissions()->detach((int)$permissionId);
+            }
         }
 
+        notyf()->success('User permissions updated successfully!');
+
+        return $request->input('action') === 'save_stay'
+            ? back()
+            : redirect()->route('admin.user.index');
     }
 
 }

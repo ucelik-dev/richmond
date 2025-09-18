@@ -106,22 +106,22 @@ class UserDataTable extends DataTable
             ->addColumn('action', function ($row) {
                 $btns = '';
                 
-                if (Auth::user()->can('edit_admin_user_permissions')) {
+                if(Auth::user()?->canResource('admin_user_permissions','edit')){
                     $btns .= '<a href="'.route('admin.user.permission.edit', $row->id).'"
                                class="btn-sm text-yellow me-2 text-decoration-none">
                                <i class="fa-solid fa-user-shield fa-lg"></i></a>';
                 }
-                if (Auth::user()->can('edit_admin_users')) {
+                if(Auth::user()?->canResource('admin_users','edit')){
                     $btns .= '<a href="'.route('admin.user.edit', $row->id).'"
                                class="btn-sm btn-primary me-2 text-decoration-none">
                                <i class="fa-solid fa-pen-to-square fa-lg"></i></a>';
                 }
-                if (Auth::user()->can('delete_admin_users')) {
+                if(Auth::user()?->canResource('admin_users','delete')){
                     $btns .= '<a href="'.route('admin.user.destroy', $row->id).'"
                                class="text-red delete-item text-decoration-none me-2">
                                <i class="fa-solid fa-trash-can fa-lg"></i></a>';
                 }
-                if (Auth::user()->can('impersonate-users')) {
+                if(Auth::user()?->canResource('admin_impersonate_users','view')){
                     $btns .= '<a href="'.route('admin.impersonate.quick', $row->id).'"
                             class="text-yellow text-decoration-none" title="Impersonate">
                                 <i class="fa-solid fa-user-secret fa-lg"></i>
