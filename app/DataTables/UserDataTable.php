@@ -186,6 +186,23 @@ class UserDataTable extends DataTable
                 }
             })
 
+            // Last login: format as d-m-Y H:i (or show — if null)
+            ->editColumn('last_login_at', function ($row) {
+                return $row->last_login_at
+                    ? \Illuminate\Support\Carbon::parse($row->last_login_at)->format('Y-m-d H:i')
+                    : '';
+            })
+
+            // (Optional) allow searching by formatted last_login_at
+            ->filterColumn('last_login_at', function ($q, $kw) {
+                $kw = trim($kw);
+                if ($kw === '') return;
+                $q->whereRaw("DATE_FORMAT(users.last_login_at, '%Y-%m-%d %H:%i') LIKE ?", ["%{$kw}%"]);
+            })
+
+            // (Optional) show em dash if IP is null
+            ->editColumn('last_login_ip', fn ($r) => e($r->last_login_ip ?? ''))
+
 
             ->rawColumns([
                 'image','name_block','courses','batches',
@@ -200,8 +217,7 @@ class UserDataTable extends DataTable
         return $model->newQuery()
             ->select([
                 'users.id','users.name','users.email','users.contact_email','users.phone','users.image',
-                'users.account_status',
-                'users.created_at',
+                'users.account_status','users.created_at', 'users.login_count','users.last_login_at','users.last_login_ip',
                 DB::raw("DATE_FORMAT(users.created_at, '%Y-%m-%d') AS registered_text"),
                 'user_statuses.name  as user_status_name',
                 'user_statuses.color as user_status_color',
@@ -391,6 +407,9 @@ class UserDataTable extends DataTable
             Column::computed('user_status')->title('User Status')->name('user_statuses.name')->orderable(false)->searchable(true),
             Column::computed('roles')->title('Roles')->orderable(false)->searchable(true),
             Column::make('registered_text')->title('Registration')->name('users.created_at')->orderable(true)->searchable(true),
+            Column::make('login_count')->title('Login Count')->name('users.login_count')->orderable(true)->searchable(true)->width(80)->visible(false),
+            Column::make('last_login_at')->title('Last Login')->name('users.last_login_at')->orderable(true)->searchable(true)->addClass('text-nowrap')->visible(false),
+            Column::make('last_login_ip')->title('Last IP')->name('users.last_login_ip')->orderable(false)->searchable(true)->addClass('text-nowrap')->visible(false),
             Column::computed('action')->title('Action')->exportable(false)->printable(false)->addClass('text-nowrap')->orderable(false)->searchable(false),
         ];
     }
