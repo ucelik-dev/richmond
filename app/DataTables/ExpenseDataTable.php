@@ -62,12 +62,12 @@ class ExpenseDataTable extends DataTable
             ->addColumn('action', function ($row) {
                 $btns = '';
 
-                if (Auth::user()->can('edit_admin_expenses')) {
+                if(Auth::user()?->canResource('admin_expenses','edit')){
                     $btns .= '<a href="'.route('admin.expense.edit', $row->id).'"
                                class="btn-sm btn-primary me-2 text-decoration-none">
                                <i class="fa-solid fa-pen-to-square fa-lg"></i></a>';
                 }
-                if (Auth::user()->can('delete_admin_expenses')) {
+                if(Auth::user()?->canResource('admin_expenses','delete')){
                     $btns .= '<a href="'.route('admin.expense.destroy', $row->id).'"
                                class="text-red delete-item text-decoration-none">
                                <i class="fa-solid fa-trash-can fa-lg"></i></a>';

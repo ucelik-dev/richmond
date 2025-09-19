@@ -98,9 +98,9 @@
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                     
-                    @can('view_admin_profile')
+                    @if(auth()->user()?->canResource('admin_profile','view'))
                         <a href="{{ route('admin.profile.edit') }}" class="dropdown-item">Profile</a>
-                    @endcan
+                    @endif
 
                     <a href="#" onclick="event.preventDefault(); getElementById('logout').submit();" class="dropdown-item">Logout</a>
                         <form method="POST" id="logout" action="{{ route('logout') }}">

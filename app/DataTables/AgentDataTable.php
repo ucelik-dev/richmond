@@ -197,17 +197,17 @@ class AgentDataTable extends DataTable
             ->addColumn('action', function ($row) {
                 $btns = '';
 
-                if (Auth::user()->can('edit_admin_agents')) {
+                if(Auth::user()?->canResource('admin_agents','edit')){
                     $btns .= '<a href="'.route('admin.agent.edit', $row->id).'"
                                class="btn-sm btn-primary me-2 text-decoration-none">
                                <i class="fa-solid fa-pen-to-square fa-lg"></i></a>';
                 }
-                if (Auth::user()->can('delete_admin_agents')) {
+                if(Auth::user()?->canResource('admin_agents','delete')){
                     $btns .= '<a href="'.route('admin.agent.destroy', $row->id).'"
                                class="text-red delete-item me-2 text-decoration-none">
                                <i class="fa-solid fa-trash-can fa-lg"></i></a>';
                 }
-                if (Auth::user()->can('impersonate-users')) {
+                if(Auth::user()?->canResource('admin_impersonate_users','edit')){
                     $btns .= '<a href="'.route('admin.impersonate.quick', $row->id).'"
                             class="text-yellow text-decoration-none" title="Impersonate">
                                 <i class="fa-solid fa-user-secret fa-lg"></i>

@@ -57,12 +57,12 @@ class GraduateDataTable extends DataTable
                 $del  = route('admin.graduate.destroy', $r->id);
 
                 $h = '';
-                if (Auth::user()->can('edit_admin_graduates')) {
+                if(Auth::user()?->canResource('admin_graduates','edit')){
                     $h .= '<a href="'.$edit.'" class="btn-sm btn-primary me-2 text-decoration-none">
                              <i class="fa-solid fa-pen-to-square fa-lg"></i>
                            </a>';
                 }
-                if (Auth::user()->can('delete_admin_graduates')) {
+                if(Auth::user()?->canResource('admin_graduates','delete')){
                     $h .= '<a href="'.$del.'" class="text-red delete-item text-decoration-none">
                              <i class="fa-solid fa-trash-can fa-lg"></i>
                            </a>';

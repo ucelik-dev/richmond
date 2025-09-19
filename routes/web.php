@@ -76,7 +76,7 @@ Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'student', 'as' 
     });
 
     // Profile Routes Group with its specific permission check
-    Route::group(['middleware' => ['can:view_student_profile']], function(){
+    Route::group(['middleware' => ['permission:student_profile,view']], function(){
         Route::get('/profile', [StudentProfileController::class, 'index'])->name('profile');
         Route::post('/profile/update', [StudentProfileController::class, 'updateProfile'])->name('profile.update');
         Route::post('/profile/update-password', [StudentProfileController::class, 'updatePassword'])->name('profile.update-password');
@@ -85,19 +85,19 @@ Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'student', 'as' 
     });
 
 
-    Route::get('/document', [StudentDocumentController::class, 'index'])->name('document')->middleware('can:view_student_documents');
-    Route::post('/document/update', [StudentDocumentController::class, 'updateDocument'])->name('document.update')->middleware('can:edit_student_documents');
+    Route::get('/document', [StudentDocumentController::class, 'index'])->name('document')->middleware('permission:student_documents,view');
+    Route::post('/document/update', [StudentDocumentController::class, 'updateDocument'])->name('document.update')->middleware('permission:student_documents,edit');
 
-    Route::get('assignment', [StudentAssignmentController::class, 'index'])->name('assignment.index')->middleware('can:view_student_assignments');
-    Route::get('assignment/{module}/create', [StudentAssignmentController::class, 'create'])->name('assignment.create')->middleware('can:edit_student_assignments');
-    Route::post('assignment/{module}', [StudentAssignmentController::class, 'store'])->name('assignment.store')->middleware('can:edit_student_assignments');
+    Route::get('assignment', [StudentAssignmentController::class, 'index'])->name('assignment.index')->middleware('permission:student_assignments,view');
+    Route::get('assignment/{module}/create', [StudentAssignmentController::class, 'create'])->name('assignment.create')->middleware('permission:student_assignments,edit');
+    Route::post('assignment/{module}', [StudentAssignmentController::class, 'store'])->name('assignment.store')->middleware('permission:student_assignments,edit');
 
-    Route::get('/payment', [StudentPaymentController::class, 'index'])->name('payment.index')->middleware('can:view_student_payments');
+    Route::get('/payment', [StudentPaymentController::class, 'index'])->name('payment.index')->middleware('permission:student_payments,view');
 
-    Route::get('/course', [StudentCourseController::class, 'index'])->name('course')->middleware('can:view_student_courses');
+    Route::get('/course', [StudentCourseController::class, 'index'])->name('course')->middleware('permission:student_courses,view');
 
     /* Email Log Routes */
-    Route::group(['middleware' => ['can:view_student_emails']], function(){
+    Route::group(['middleware' => ['permission:student_emails,view']], function(){
         Route::get('email-log', [StudentEmailLogController::class, 'index'])->name('email-log.index');
         Route::get('email-log/{id}', [StudentEmailLogController::class, 'show'])->name('email-log.show');
         Route::get('email-log/{emailLog}/inline', [StudentEmailLogController::class, 'inline'])->name('email-log.inline');
@@ -116,7 +116,7 @@ Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'instructor', 'a
     });
 
     /* Profile Routes */
-    Route::group(['middleware' => ['can:view_instructor_profile']], function(){
+    Route::group(['middleware' => ['permission:instructor_profile,view']], function(){
         Route::get('/profile', [InstructorProfileController::class, 'index'])->name('profile');
         Route::post('/profile/update', [InstructorProfileController::class, 'updateProfile'])->name('profile.update');
         Route::post('/profile/update-password', [InstructorProfileController::class, 'updatePassword'])->name('profile.update-password');
@@ -125,17 +125,17 @@ Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'instructor', 'a
     });
 
     /* Group and Group Share Routes */
-    Route::resource('groups', InstructorGroupController::class)->middleware('can:view_instructor_groups');
+    Route::resource('groups', InstructorGroupController::class)->middleware('permission:instructor_groups,view');
     // Nested resource: groups.group-shares, with shallow routing
-    Route::resource('groups.group-shares', InstructorGroupShareController::class)->middleware('can:view_instructor_group_shares');
+    Route::resource('groups.group-shares', InstructorGroupShareController::class)->middleware('permission:instructor_group_shares,view');
 
-    Route::get('/students', [InstructorStudentController::class, 'index'])->name('students.index')->middleware('can:view_instructor_students');
+    Route::get('/students', [InstructorStudentController::class, 'index'])->name('students.index')->middleware('permission:instructor_students,view');
 
     /* Assignment Routes */
-    Route::get('assignment', [InstructorAssignmentController::class, 'index'])->name('assignment.index')->middleware('can:view_instructor_assignments');
-    Route::get('assignment/{submission}/edit', [InstructorAssignmentController::class, 'edit'])->name('assignment.edit')->middleware('can:edit_instructor_assignments');
-    Route::put('assignment/{module}/update', [InstructorAssignmentController::class, 'update'])->name('assignment.update')->middleware('can:edit_instructor_assignments');
-    Route::delete('assignment/evaluation/{submission}', [InstructorAssignmentController::class, 'destroyEvaluation'])->name('assignment.evaluation.destroy')->middleware('can:delete_instructor_assignments');
+    Route::get('assignment', [InstructorAssignmentController::class, 'index'])->name('assignment.index')->middleware('permission:instructor_assignments,view');
+    Route::get('assignment/{submission}/edit', [InstructorAssignmentController::class, 'edit'])->name('assignment.edit')->middleware('permission:instructor_assignments,edit');
+    Route::put('assignment/{module}/update', [InstructorAssignmentController::class, 'update'])->name('assignment.update')->middleware('permission:instructor_assignments,edit');
+    Route::delete('assignment/evaluation/{submission}', [InstructorAssignmentController::class, 'destroyEvaluation'])->name('assignment.evaluation.destroy')->middleware('permission:instructor_assignments,delete');
 
 
 
@@ -150,7 +150,7 @@ Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'agent', 'as' =>
     });
 
     /* Profile Routes */
-    Route::group(['middleware' => ['can:view_agent_profile']], function(){
+    Route::group(['middleware' => ['permission:agent_profile,view']], function(){
         Route::get('/profile', [AgentProfileController::class, 'index'])->name('profile');
         Route::post('/profile/update', [AgentProfileController::class, 'updateProfile'])->name('profile.update');
         Route::post('/profile/update-password', [AgentProfileController::class, 'updatePassword'])->name('profile.update-password');
@@ -158,7 +158,7 @@ Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'agent', 'as' =>
         Route::post('/profile/update-avatar', [AgentProfileController::class, 'updateAvatar'])->name('profile.update-avatar');
     });
 
-    Route::get('/registration', [AgentRegistrationController::class, 'index'])->name('registration.index')->middleware('can:view_agent_registrations');
+    Route::get('/registration', [AgentRegistrationController::class, 'index'])->name('registration.index')->middleware('permission:agent_registrations,view');
 
 });
 

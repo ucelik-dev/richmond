@@ -138,7 +138,7 @@
 
                             </div>
 
-                            @can('edit_admin_profile')
+                            @if(auth()->user()?->canResource('admin_profile','edit'))
                                 <div class="row">
                                 
                                     <div class="col-xl-12 mt-3">
@@ -151,7 +151,7 @@
                                     </div>
 
                                 </div>
-                            @endcan
+                            @endif
 
                         </form>
 

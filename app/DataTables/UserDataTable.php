@@ -121,7 +121,7 @@ class UserDataTable extends DataTable
                                class="text-red delete-item text-decoration-none me-2">
                                <i class="fa-solid fa-trash-can fa-lg"></i></a>';
                 }
-                if(Auth::user()?->canResource('admin_impersonate_users','view')){
+                if(Auth::user()?->canResource('admin_impersonate_users','edit')){
                     $btns .= '<a href="'.route('admin.impersonate.quick', $row->id).'"
                             class="text-yellow text-decoration-none" title="Impersonate">
                                 <i class="fa-solid fa-user-secret fa-lg"></i>

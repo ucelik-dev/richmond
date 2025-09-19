@@ -167,17 +167,17 @@ class InstructorDataTable extends DataTable
             ->addColumn('action', function ($row) {
                 $btns = '';
 
-                if (Auth::user()->can('edit_admin_instructors')) {
+                if(Auth::user()?->canResource('admin_impersonate_instructors','edit')){
                     $btns .= '<a href="'.route('admin.instructor.edit', $row->id).'"
                                class="btn-sm btn-primary me-2 text-decoration-none">
                                <i class="fa-solid fa-pen-to-square fa-lg"></i></a>';
                 }
-                if (Auth::user()->can('delete_admin_instructors')) {
+                if(Auth::user()?->canResource('admin_impersonate_instructors','delete')){
                     $btns .= '<a href="'.route('admin.instructor.destroy', $row->id).'"
                                class="text-red delete-item me-2 text-decoration-none">
                                <i class="fa-solid fa-trash-can fa-lg"></i></a>';
                 }
-                if (Auth::user()->can('impersonate-users')) {
+                if(Auth::user()?->canResource('admin_impersonate_users','edit')){
                     $btns .= '<a href="'.route('admin.impersonate.quick', $row->id).'"
                             class="text-yellow text-decoration-none" title="Impersonate">
                                 <i class="fa-solid fa-user-secret fa-lg"></i>

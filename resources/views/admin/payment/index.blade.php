@@ -68,12 +68,12 @@
                 <div class="card-header">
                     <h3 class="card-title">PAYMENTS</h3>
                     <div class="card-actions">
-                        @can('create_admin_payments')
+                        @if(auth()->user()?->canResource('admin_payments','create'))
                             <a href="{{ route('admin.payment.create') }}" class="btn btn-default">
                                 <i class="fa-solid fa-plus me-2"></i>
                                 Add new
                             </a>
-                        @endcan
+                        @endif
                     </div>
                 </div>
                 <div class="card-body table-responsive">

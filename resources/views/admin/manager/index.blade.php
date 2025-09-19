@@ -7,12 +7,12 @@
                 <div class="card-header">
                     <h3 class="card-title">MANAGERS</h3>
                     <div class="card-actions">
-                        @can('create_admin_managers')
+                        @if(auth()->user()?->canResource('admin_managers','create'))
                             <a href="{{ route('admin.manager.create') }}" class="btn btn-default">
                                 <i class="fa-solid fa-plus me-2"></i>
                                 Add new
                             </a>
-                        @endcan
+                        @endif
                     </div>
                 </div>
                 <div class="card-body table-responsive">

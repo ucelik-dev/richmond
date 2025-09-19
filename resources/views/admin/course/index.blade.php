@@ -9,10 +9,12 @@
                 <div class="card-header">
                     <h3 class="card-title">COURSES</h3>
                     <div class="card-actions">
-                        <a href="{{ route('admin.course.create') }}" class="btn btn-default">
-                            <i class="fa-solid fa-plus me-2"></i>
-                            Add new
-                        </a>
+                        @if(auth()->user()?->canResource('admin_courses','create'))
+                            <a href="{{ route('admin.course.create') }}" class="btn btn-default">
+                                <i class="fa-solid fa-plus me-2"></i>
+                                Add new
+                            </a>
+                        @endif
                     </div>
                 </div>
                 <div class="card-body">
@@ -63,17 +65,17 @@
                                             @endif
                                         </td>
                                         <td>
-                                            @can('edit_admin_courses')
+                                            @if(auth()->user()?->canResource('admin_courses','edit'))
                                                 <a href="{{ route('admin.course.edit', $course->id) }}" class="btn-sm btn-primary me-2 text-decoration-none">
                                                     <i class="fa-solid fa-pen-to-square fa-lg"></i>
                                                 </a>
-                                            @endcan
+                                            @endif
 
-                                            @can('delete_admin_courses')
+                                            @if(auth()->user()?->canResource('admin_courses','delete'))
                                                 <a href="{{ route('admin.course.destroy', $course->id) }}" class="text-red delete-item text-decoration-none">
                                                     <i class="fa-solid fa-trash-can fa-lg"></i>
                                                 </a>
-                                            @endcan
+                                            @endif
                                         </td>
                                     </tr>
 

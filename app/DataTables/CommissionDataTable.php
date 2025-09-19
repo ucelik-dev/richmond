@@ -71,10 +71,10 @@ class CommissionDataTable extends DataTable
                 $del  = route('admin.commission.destroy', $r->id);
 
                 $h = '';
-                if (Auth::user()->can('edit_admin_commissions')) {
+                if(Auth::user()?->canResource('admin_commissions','edit')){
                     $h .= '<a href="'.$edit.'" class="btn-sm btn-primary me-2 text-decoration-none"><i class="fa-solid fa-pen-to-square fa-lg"></i></a>';
                 }
-                if (Auth::user()->can('delete_admin_commissions')) {
+                if(Auth::user()?->canResource('admin_commissions','delete')){
                     $h .= '<a href="'.$del.'" class="text-red delete-item text-decoration-none"><i class="fa-solid fa-trash-can fa-lg"></i></a>';
                 }
                 return $h ?: '-';

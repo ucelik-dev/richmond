@@ -7,10 +7,12 @@
                 <div class="card-header">
                     <h3 class="card-title">USERS</h3>
                     <div class="card-actions">
-                        <a href="{{ route('admin.user.create') }}" class="btn btn-default">
-                            <i class="fa-solid fa-plus me-2"></i>
-                            Add new
-                        </a>
+                        @if(auth()->user()?->canResource('admin_users','create'))
+                            <a href="{{ route('admin.user.create') }}" class="btn btn-default">
+                                <i class="fa-solid fa-plus me-2"></i>
+                                Add new
+                            </a>
+                        @endif
                     </div>
                 </div>
                 <div class="card-body table-responsive">

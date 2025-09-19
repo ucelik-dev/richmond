@@ -191,17 +191,17 @@ class StudentDataTable extends DataTable
             ->addColumn('action', function ($row) {
                 $btns = '';
 
-                if (Auth::user()->can('edit_admin_students')) {
+                if(Auth::user()?->canResource('admin_students','edit')){
                     $btns .= '<a href="'.route('admin.student.edit', $row->id).'"
                                class="btn-sm btn-primary me-2 text-decoration-none" title="Edit">
                                <i class="fa-solid fa-pen-to-square fa-lg"></i></a>';
                 }
-                if (Auth::user()->can('delete_admin_students')) {
+                if(Auth::user()?->canResource('admin_students','delete')){
                     $btns .= '<a href="'.route('admin.student.destroy', $row->id).'"
                                class="text-red delete-item me-2 text-decoration-none" title="Delete">
                                <i class="fa-solid fa-trash-can fa-lg"></i></a>';
                 }
-                if (Auth::user()->can('impersonate-users')) {
+                if(Auth::user()?->canResource('admin_impersonate_users','edit')){
                     $btns .= '<a href="'.route('admin.impersonate.quick', $row->id).'"
                             class="text-yellow text-decoration-none" title="Impersonate">
                                 <i class="fa-solid fa-user-secret fa-lg"></i>

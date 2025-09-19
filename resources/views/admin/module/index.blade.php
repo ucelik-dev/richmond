@@ -9,10 +9,12 @@
                 <div class="card-header">
                     <h3 class="card-title">MODULES</h3>
                     <div class="card-actions">
-                        <a href="{{ route('admin.module.create') }}" class="btn btn-default">
-                            <i class="fa-solid fa-plus me-2"></i>
-                            Add new
-                        </a>
+                        @if(auth()->user()?->canResource('admin_modules','create'))
+                            <a href="{{ route('admin.module.create') }}" class="btn btn-default">
+                                <i class="fa-solid fa-plus me-2"></i>
+                                Add new
+                            </a>
+                        @endif
                     </div>
                 </div>
                 <div class="card-body">
@@ -80,16 +82,16 @@
                                             @endif
                                         </td>
                                         <td class="text-nowrap">
-                                            @can('edit_admin_modules')
+                                            @if(auth()->user()?->canResource('admin_modules','edit'))
                                                 <a href="{{ route('admin.module.edit', $module->id) }}" class="btn-sm btn-primary me-2 text-decoration-none">
                                                     <i class="fa-solid fa-pen-to-square fa-lg"></i>
                                                 </a>
-                                            @endcan
-                                            @can('delete_admin_modules')
+                                            @endif
+                                            @if(auth()->user()?->canResource('admin_modules','delete'))
                                                 <a href="{{ route('admin.module.destroy', $module->id) }}" class="text-red delete-item text-decoration-none">
                                                     <i class="fa-solid fa-trash-can fa-lg"></i>
                                                 </a>
-                                            @endcan
+                                            @endif
                                         </td>
                                     </tr>
 

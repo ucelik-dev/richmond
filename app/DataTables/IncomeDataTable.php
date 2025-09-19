@@ -33,12 +33,12 @@ class IncomeDataTable extends DataTable
                 $del  = route('admin.income.destroy', $r->id);
 
                 $html = '';
-                if (Auth::user()->can('edit_admin_incomes')) {
+                if(Auth::user()?->canResource('admin_incomes','edit')){
                     $html .= '<a href="'.$edit.'" class="btn-sm btn-primary me-2 text-decoration-none">
                                 <i class="fa-solid fa-pen-to-square fa-lg"></i>
                               </a>';
                 }
-                if (Auth::user()->can('delete_admin_incomes')) {
+                if(Auth::user()?->canResource('admin_incomes','delete')){
                     $html .= '<a href="'.$del.'" class="text-red delete-item text-decoration-none">
                                 <i class="fa-solid fa-trash-can fa-lg"></i>
                               </a>';
