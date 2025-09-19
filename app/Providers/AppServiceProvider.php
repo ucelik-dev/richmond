@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Support\Facades\Log;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +27,16 @@ class AppServiceProvider extends ServiceProvider
                 ->numbers()
                 ->symbols()
                 ->uncompromised();
+        });
+
+        Event::listen(Login::class, function (Login $event) {
+            // If you only want to count 'web' guard:
+            // if (($event->guard ?? 'web') !== 'web') return;
+
+            $event->user->increment('login_count', 1, [
+                'last_login_at' => now(),
+                'last_login_ip' => request()->ip(),
+            ]);
         });
 
         Gate::define('impersonate-users', function ($user) {

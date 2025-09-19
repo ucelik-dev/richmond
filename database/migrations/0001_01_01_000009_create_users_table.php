@@ -47,9 +47,9 @@ return new class extends Migration
 
             $table->enum('approve_status', ['pending','approved','declined','suspended','ongoing','withdrawn','graduated'])->default('pending');
 
-            $table->integer('login_count')->nullable();
-            $table->dateTime('last_login')->default(now());
-            $table->string('ip_address')->nullable();
+            $table->integer('login_count')->default(0);
+            $table->dateTime('last_login_at')->nullable();
+            $table->string('last_login_ip')->nullable();
 
             $table->rememberToken();
             $table->timestamps();

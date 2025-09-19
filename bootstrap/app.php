@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\CheckPermissionMiddleware;
 use App\Http\Middleware\CheckUserRoleMiddleware;
+use App\Providers\AppServiceProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
