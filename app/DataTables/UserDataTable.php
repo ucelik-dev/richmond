@@ -188,9 +188,22 @@ class UserDataTable extends DataTable
 
             // Last login: format as d-m-Y H:i (or show — if null)
             ->editColumn('last_login_at', function ($row) {
-                return $row->last_login_at
-                    ? \Illuminate\Support\Carbon::parse($row->last_login_at)->format('Y-m-d H:i')
-                    : '';
+                $v = $row->last_login_at;
+
+                // Handle casted Carbon, nulls, and MySQL zero-dates safely
+                if ($v instanceof \Illuminate\Support\Carbon) {
+                    return $v->format('d-m-Y H:i');
+                }
+
+                if (empty($v) || $v === '0000-00-00 00:00:00' || $v === '0000-00-00') {
+                    return '';
+                }
+
+                try {
+                    return \Illuminate\Support\Carbon::parse($v)->format('d-m-Y H:i');
+                } catch (\Throwable $e) {
+                    return '';
+                }
             })
 
             // (Optional) allow searching by formatted last_login_at
