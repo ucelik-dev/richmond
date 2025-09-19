@@ -45,7 +45,7 @@ class StudentEnrolledMail extends Mailable
     public function attachments(): array
     {
         return [
-            Attachment::fromPath(public_path('mail/student-enrollment-info.pdf')),
+            Attachment::fromPath(public_path('mail/student-agreement.pdf')),
         ];
     }
 
