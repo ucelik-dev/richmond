@@ -17,7 +17,9 @@
     <meta name="base_url" content="{{ url('/') }}">
     <meta name="csrf_token" content="{{ csrf_token() }}">
     
-    <title>Dashboard - Tabler</title>
+    <title>Richmond College</title>
+
+    <link rel="icon" type="image/png" href="{{ asset('default/favicon-32x32.png') }}">
 
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-MzJx...==" crossorigin="anonymous" referrerpolicy="no-referrer" />
