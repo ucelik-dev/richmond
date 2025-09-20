@@ -8,6 +8,7 @@ use App\Models\UserStatus;
 use DB;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Illuminate\Support\Facades\Auth;
+use Str;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Button;
@@ -32,6 +33,12 @@ class UserDataTable extends DataTable
             })
 
             ->addColumn('college', fn($row) => e($row->college_name ?? ''))
+
+            ->editColumn('education_status', function ($row) {
+                return $row->education_status
+                    ? Str::of($row->education_status)->replace('_', ' ')->title()
+                    : '';
+            })
 
             ->filterColumn('college', function ($q, $kw) {
                 $kw = trim($kw);
@@ -231,6 +238,7 @@ class UserDataTable extends DataTable
             ->select([
                 'users.id','users.name','users.email','users.contact_email','users.phone','users.image',
                 'users.account_status','users.created_at', 'users.login_count','users.last_login_at','users.last_login_ip',
+                'users.education_status',
                 DB::raw("DATE_FORMAT(users.created_at, '%Y-%m-%d') AS registered_text"),
                 'user_statuses.name  as user_status_name',
                 'user_statuses.color as user_status_color',
@@ -410,6 +418,7 @@ class UserDataTable extends DataTable
             Column::computed('image')->title('Image')->exportable(false)->printable(false)->orderable(false)->searchable(false)->width(60)->visible(false),
             Column::computed('college')->title('College')->name('colleges.name')->orderable(false)->searchable(true),
             Column::make('name')->title('Name')->name('users.name')->orderable(false)->searchable(true)->addClass('text-nowrap'),
+            Column::computed('education_status')->title('Education Status')->orderable(false)->searchable(true)->visible(false),
             Column::make('email')->title('Email')->name('users.email')->orderable(false)->searchable(true)->visible(false),
             Column::computed('contact_email')->title('Contact Email')->orderable(false)->searchable(true)->visible(false),
             Column::make('phone')->title('Phone')->name('users.phone')->orderable(false)->searchable(true),

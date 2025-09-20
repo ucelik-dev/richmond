@@ -7,6 +7,7 @@ use App\Models\UserStatus;
 use DB;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Illuminate\Support\Facades\Auth;
+use Str;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Button;
@@ -26,6 +27,12 @@ class StudentDataTable extends DataTable
             })
 
             ->addColumn('college', fn($row) => e($row->college_name ?? ''))
+
+            ->editColumn('education_status', function ($row) {
+                return $row->education_status
+                    ? Str::of($row->education_status)->replace('_', ' ')->title()
+                    : '';
+            })
 
             ->filterColumn('college', function ($q, $kw) {
                 $kw = trim($kw);
@@ -330,7 +337,7 @@ class StudentDataTable extends DataTable
             'users.id','users.name','users.email','users.contact_email','users.phone','users.image',
             'users.gender','users.dob','users.city','users.post_code','users.address',
             'users.country_id','users.account_status','users.created_at','users.login_count','users.last_login_at','users.last_login_ip',
-            'users.sales_person_id','users.agent_id','users.manager_id','users.reference',
+            'users.sales_person_id','users.agent_id','users.manager_id','users.reference','users.education_status',
             DB::raw("DATE_FORMAT(users.created_at, '%Y-%m-%d') AS registered_text"),
             'user_statuses.name  as user_status_name',
             'user_statuses.color as user_status_color',
@@ -490,6 +497,7 @@ class StudentDataTable extends DataTable
             Column::computed('image')->title('Image')->exportable(false)->printable(false)->orderable(false)->searchable(false)->width(64),
             Column::computed('college')->title('College')->name('colleges.name')->orderable(false)->searchable(true),
             Column::make('name')->title('Name')->orderable(false)->searchable(true),
+            Column::computed('education_status')->title('Education Status')->orderable(false)->searchable(true)->visible(false),
             Column::computed('country')->title('Country')->name('countries.name')->orderable(false)->searchable(true)->visible(false),
             Column::computed('registration_block')->title('Registration Info')->orderable(false)->searchable(true)->visible(false)->addClass('text-nowrap'),
             Column::computed('email')->title('Email')->orderable(false)->searchable(true)->visible(false),
