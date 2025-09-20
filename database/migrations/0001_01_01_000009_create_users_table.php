@@ -34,6 +34,8 @@ return new class extends Migration
             $table->string('company')->nullable();
             $table->text('bio')->nullable();
 
+            $table->string('education_status')->nullable();
+
             $table->foreignId('sales_person_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('agent_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('manager_id')->nullable()->constrained('users')->nullOnDelete();

@@ -80,6 +80,19 @@
                                         <x-input-error :messages="$errors->get('dob')" class="mt-2 text-danger small" />
                                     </div>
                                 </div>
+                                <div class="col-xl-12">
+                                    <div class="general_form_input">
+                                        <label for="#">Education Status</label>
+                                        <select class="form-control form-select" name="education_status">
+                                            <option value="">Select a status</option>
+                                            <option @selected($student->education_status == 'high_school_student') value="high_school_student">High School Student</option>
+                                            <option @selected($student->education_status == 'high_school_graduate') value="high_school_graduate">High School Graduate</option>
+                                            <option @selected($student->education_status == 'university_student') value="university_student">University Student</option>
+                                            <option @selected($student->education_status == 'university_graduate') value="university_graduate">University Graduate</option>
+                                        </select>
+                                        <x-input-error :messages="$errors->get('education_status')" class="mt-2 text-danger small" />
+                                    </div>
+                                </div>
                                 <div class="col-xl-6">
                                     <div class="general_form_input">
                                         <label for="#" class="label-required">Email</label>

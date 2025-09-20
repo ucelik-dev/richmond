@@ -129,6 +129,19 @@
                                         <x-input-error :messages="$errors->get('dob')" class="mt-2 text-danger small" />
                                     </div>
                                 </div>
+                                <div class="col-xl-12">
+                                    <div class="general_form_input">
+                                        <label for="#">Education Status</label>
+                                        <select class="form-control form-select" name="education_status">
+                                            <option value="">Select a status</option>
+                                            <option value="high_school_student" {{ old('education_status') == 'high_school_student' ? 'selected' : '' }}>High School Student</option>
+                                            <option value="high_school_graduate" {{ old('education_status') == 'high_school_graduate' ? 'selected' : '' }}>High School Graduate</option>
+                                            <option value="university_student" {{ old('education_status') == 'university_student' ? 'selected' : '' }}>University Student</option>
+                                            <option value="university_graduate" {{ old('education_status') == 'university_graduate' ? 'selected' : '' }}>University Graduate</option>
+                                        </select>
+                                        <x-input-error :messages="$errors->get('education_status')" class="mt-2 text-danger small" />
+                                    </div>
+                                </div>
                                 <div class="col-xl-6">
                                     <div class="general_form_input">
                                         <label for="#" class="label-required">Email</label>

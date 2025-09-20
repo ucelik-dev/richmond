@@ -33,6 +33,7 @@ class AdminUserCreateRequest extends FormRequest
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class, 'email')],
             'contact_email' => ['nullable', 'string', 'lowercase', 'email', 'max:255'],
             'dob' => ['required', 'date'], 
+            'education_status' => ['nullable', 'string', 'max:100', 'in:high_school_student,high_school_graduate,university_student,university_graduate'],
 
             // Course Enrollments (multiple rows)
             'enrollments' => ['nullable', 'array'],

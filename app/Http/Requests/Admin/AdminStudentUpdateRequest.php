@@ -28,7 +28,7 @@ class AdminStudentUpdateRequest extends FormRequest
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class, 'email')->ignore($this->route('student'))],
             'contact_email' => ['nullable', 'string', 'lowercase', 'email', 'max:255'],
             'dob' => ['required', 'date'], 
-
+            'education_status' => ['nullable', 'string', 'max:100', 'in:high_school_student,high_school_graduate,university_student,university_graduate'],
 
             'sales_person_id' => ['nullable', 'exists:users,id'],
             'agent_id' => ['nullable', 'exists:users,id'],

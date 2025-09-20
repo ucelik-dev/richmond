@@ -87,6 +87,7 @@ class AdminUserController extends Controller
         $user->country_id = $request->country_id;
         $user->address = $request->address;
         $user->bio = $request->bio;
+        $user->education_status = $request->education_status;
         $user->account_status = $request->account_status;
         $user->user_status_id = $request->user_status_id;
 
@@ -427,6 +428,7 @@ class AdminUserController extends Controller
         $user->country_id = $request->country_id;
         $user->address = $request->address;
         $user->bio = $request->bio;
+        $user->education_status = $request->education_status;
         $user->account_status = $request->account_status;
         $user->user_status_id = $request->user_status_id;
 

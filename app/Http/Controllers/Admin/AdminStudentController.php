@@ -100,6 +100,7 @@ class AdminStudentController extends Controller
         $student->email = $request->email;
         $student->contact_email = $request->contact_email ?? $request->email;
         $student->dob = $request->dob;
+        $student->education_status = $request->education_status;
         $student->post_code = $request->post_code;
         $student->city = $request->city;
         $student->country_id = $request->country_id;
@@ -459,6 +460,7 @@ class AdminStudentController extends Controller
         $student->email = $request->email;
         $student->contact_email = $request->contact_email ?? $request->email;
         $student->dob = $request->dob;
+        $student->education_status = $request->education_status;
         $student->post_code = $request->post_code;
         $student->city = $request->city;
         $student->country_id = $request->country_id;
