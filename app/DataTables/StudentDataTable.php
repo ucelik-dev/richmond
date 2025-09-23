@@ -286,6 +286,17 @@ class StudentDataTable extends DataTable
                 $q->whereRaw("DATE_FORMAT(users.created_at, '%Y-%m-%d') LIKE ?", ["%".trim($kw)."%"]);
             })
 
+            ->addColumn('diploma_file', function ($row) {
+                if (!$row->relationLoaded('graduates')) return '';
+
+                return $row->graduates
+                    ->whereNotNull('diploma_file')
+                    ->map(function ($g) {
+                        return '<a href="'.asset($g->diploma_file).'" target="_blank" class="text-primary text-decoration-none text-nowrap"><i class="fa-solid fa-eye"></i> View</a>';
+                    })
+                    ->implode('<br>');
+            })
+            
             // Last login: format as d-m-Y H:i (or show — if null)
             ->editColumn('last_login_at', function ($row) {
                 $v = $row->last_login_at;
@@ -319,7 +330,7 @@ class StudentDataTable extends DataTable
             ->rawColumns([
                 'image', 'registration_block',
                 'courses','groups','batches', 'account_status', 'awarding_body_col', 'awarding_data_col',
-                'account_status','user_status','roles_badges','action','group_instructors'
+                'account_status','user_status','roles_badges','action','group_instructors','diploma_file',
             ])
             ->setRowId('id');
     }
@@ -359,6 +370,7 @@ class StudentDataTable extends DataTable
             'salesPerson:id,name',
             'agent:id,company',
             'manager:id,name',
+            'graduates:id,user_id,diploma_file,rc_graduation_date',
         ]);
     }
 
@@ -438,7 +450,7 @@ class StudentDataTable extends DataTable
                         var $head   = $(column.header());
 
                         // no filter for some columns
-                        if (['image','action','awarding_body_col','awarding_data_col','id'].indexOf(dataSrc) !== -1) return;
+                        if (['image','action','awarding_body_col','awarding_data_col','id','diploma_file'].indexOf(dataSrc) !== -1) return;
 
                         $head.find('.dt-filter').remove(); // clean
 
@@ -512,6 +524,7 @@ class StudentDataTable extends DataTable
             Column::make('registered_text')->title('Registration')->name('users.created_at')->orderable(true)->searchable(true),
             Column::computed('awarding_body_col')->title('Awarding Body')->orderable(false)->searchable(true)->addClass('text-nowrap')->visible(false),
             Column::computed('awarding_data_col')->title("Awarding Body<br>Registration Data")->orderable(false)->searchable(false)->addClass('text-nowrap')->visible(false),
+            Column::computed('diploma_file')->title('Diploma')->orderable(false)->searchable(true)->visible(false),
             Column::make('login_count')->title('Login Count')->name('users.login_count')->orderable(true)->searchable(true)->width(80)->visible(false),
             Column::make('last_login_at')->title('Last Login')->name('users.last_login_at')->orderable(true)->searchable(true)->addClass('text-nowrap')->visible(false),
             Column::make('last_login_ip')->title('Last IP')->name('users.last_login_ip')->orderable(false)->searchable(true)->addClass('text-nowrap')->visible(false),
