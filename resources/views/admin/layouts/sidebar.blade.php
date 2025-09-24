@@ -238,7 +238,19 @@
 
 
 
-
+                @if(auth()->user()?->canResource('admin_profile','view'))
+                    <li class="nav-item dropdown">
+                        <a class="nav-link {{ setSidebarActive(['admin.profile']) }}" href="{{ route('admin.profile.edit') }}">
+                            <span
+                                class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="fa-solid fa-user"></i>
+                            </span>
+                            <span class="nav-link-title">
+                                Your Profile
+                            </span>
+                        </a>
+                    </li>
+                @endif
 
 
 

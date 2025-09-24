@@ -8,6 +8,7 @@ use App\Models\UserStatus;
 use DB;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Illuminate\Support\Facades\Auth;
+use Str;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Button;
@@ -79,6 +80,35 @@ class AgentDataTable extends DataTable
                     });
                 });
             })
+
+            ->addColumn('notes_cell', function ($row) {
+                if (!$row->relationLoaded('userNotes') || $row->userNotes->isEmpty()) {
+                    return '<small class="text-muted">No notes</small>';
+                }
+
+                return $row->userNotes->map(function ($n) {
+                    $by = $n->addedBy->name ?? null;
+                    $at = $n->created_at ? $n->created_at->format('d-m-Y') : null;
+
+                    $meta = [];
+                    if ($by) $meta[] = e($by);
+                    if ($at) $meta[] = e($at);
+
+                    return '<div class="mb-2" style="max-width:480px;white-space:normal;">'
+                        . '<div>'.nl2br(e($n->note)).'</div>'
+                        . ($meta ? '<div class="small text-muted">'.implode(' · ', $meta).'</div>' : '')
+                        . '<hr class="m-1">'
+                        . '</div>';
+                })->implode('');
+            })
+            ->filterColumn('notes_cell', function ($q, $kw) {
+                $kw = trim($kw);
+                if ($kw === '') return;
+                $q->whereHas('userNotes', function ($nq) use ($kw) {
+                    $nq->where('note', 'like', "%{$kw}%");
+                });
+            })
+
 
             // Students & commissions (accordion)
             ->addColumn('students_cell', function ($row) {
@@ -273,7 +303,7 @@ class AgentDataTable extends DataTable
             ->editColumn('last_login_ip', fn ($r) => e($r->last_login_ip ?? ''))
 
             ->rawColumns([
-                'image','name_cell','students_cell','totals_cell','account_status','user_status','action','documents_cell'
+                'image','name_cell','students_cell','totals_cell','account_status','user_status','action','documents_cell','notes_cell'
             ])
             ->setRowId('id');
     }
@@ -308,6 +338,12 @@ class AgentDataTable extends DataTable
                   ->whereColumn('commissions.user_id', 'users.id')
                   ->where('status','!=','paid');
             }, 'com_unpaid')
+
+            ->selectSub(function ($q) {
+                $q->from('user_notes as n')
+                ->selectRaw('MAX(n.created_at)')
+                ->whereColumn('n.user_id', 'users.id');
+            }, 'latest_note_at')
 
             // only AGENTS with MAIN role
             ->whereHas('roles', function ($r) {
@@ -351,6 +387,12 @@ class AgentDataTable extends DataTable
             'commissions:id,user_id,amount,status,payment_id',
             'commissions.payment:id,user_id',
             'documents:id,user_id,category_id,path',
+
+            'userNotes' => function ($q) {
+                $q->select('id','user_id','added_by','note','created_at')
+                ->orderByDesc('created_at');
+            },
+            'userNotes.addedBy:id,name',
         ]);
     }
 
@@ -483,10 +525,11 @@ class AgentDataTable extends DataTable
             Column::computed('college')->title('College')->name('colleges.name')->orderable(false)->searchable(true),
             Column::computed('name_cell')->title('Name')->orderable(false)->searchable(true),
             Column::computed('students_cell')->title('Students & Commissions')->orderable(false)->searchable(false)->addClass('text-nowrap'),
+            Column::computed('notes_cell')->title('Notes')->name('latest_note_at')->orderable(true)->searchable(true)->visible(true),
             Column::computed('totals_cell')->title('Total Commission')->orderable(false)->searchable(false),
             Column::computed('documents_cell')->title('Documents')->orderable(false)->searchable(true)->addClass('text-nowrap')->visible(false),
-            Column::computed('account_status')->title('Account Status')->orderable(false)->searchable(true),
-            Column::computed('user_status')->title('User Status')->orderable(false)->searchable(true),
+            Column::computed('account_status')->title('Account Status')->orderable(false)->searchable(true)->visible(false),
+            Column::computed('user_status')->title('User Status')->orderable(false)->searchable(true)->visible(false),
             Column::make('registered_text')->title('Registration')->name('users.created_at')->orderable(true)->searchable(true),
             Column::make('login_count')->title('Login Count')->name('users.login_count')->orderable(true)->searchable(true)->width(80)->visible(false),
             Column::make('last_login_at')->title('Last Login')->name('users.last_login_at')->orderable(true)->searchable(true)->addClass('text-nowrap')->visible(false),
