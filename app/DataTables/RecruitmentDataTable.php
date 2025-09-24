@@ -5,8 +5,10 @@ namespace App\DataTables;
 use App\Models\Recruitment;
 use App\Models\RecruitmentSource;
 use App\Models\RecruitmentStatus;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Illuminate\Support\Facades\Auth;
+use Str;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Button;
@@ -31,9 +33,26 @@ class RecruitmentDataTable extends DataTable
 
             // Call logs (count) – if you don't have the relation, leave the selectSub in query() out
             ->addColumn('call_logs', function ($r) {
-                $c = (int) ($r->call_logs_count ?? 0);
-                return $c > 0 ? $c : '';
-            })
+                if (!$r->relationLoaded('callLogs') || $r->callLogs->isEmpty()) {
+                    return '<span class="text-secondary">—</span>';
+                }
+
+            return $r->callLogs->map(function ($c) {
+                $callDate = $c->created_at ? Carbon::parse($c->created_at)->format('d-m-Y') : '—';
+                    
+                return '
+                    <div class="text-secondary " style="min-width:400px">
+                        <div style="display:grid;grid-template-columns:60px 12px 1fr;align-items:start">
+                            <div class="fw-bold">Date</div>   <div>:</div> <div>'.e($callDate).'</div>
+                            <div class="fw-bold">Method</div> <div>:</div> <div>'.e(ucfirst($c->communication_method)).'</div>
+                            <div class="fw-bold">Status</div> <div>:</div> <div><span class="badge bg-'.e($c->status->color).' text-'.e($c->status->color).'-fg">'.e($c->status->name).'</span></div>
+                            <div class="fw-bold">Note</div>   <div>:</div> <div style="word-break:break-word;white-space:normal">'.e($c->note).'</div>
+                        </div>
+                        <hr class="m-1">
+                    </div>';
+
+            })->implode('');
+        })
 
             // Source
             ->addColumn('source_name', fn($r) => e($r->source_name ?? '—'))
@@ -96,7 +115,7 @@ class RecruitmentDataTable extends DataTable
                 if ($kw !== '') $q->where('recruitments.phone', 'like', "%{$kw}%");
             })
 
-            ->rawColumns(['name_cell','status_badge','action'])
+            ->rawColumns(['name_cell','status_badge','action','call_logs'])
             ->setRowId('id');
     }
 
@@ -118,8 +137,11 @@ class RecruitmentDataTable extends DataTable
             ->leftJoin('recruitment_sources',  'recruitment_sources.id',  '=', 'recruitments.source_id')
             ->leftJoin('recruitment_statuses', 'recruitment_statuses.id', '=', 'recruitments.status_id')
 
-            // Optional count of call logs (remove if you don't track this)
-            ->withCount('callLogs');
+            ->with(['callLogs' => function ($q) {
+                $q->latest('called_at')
+                ->take(5)                   // show up to 5 latest; adjust as you like
+                ->with('status');           // only if your RecruitmentCall has status() relation
+            }]);
     }
 
     public function html(): HtmlBuilder
@@ -241,7 +263,7 @@ class RecruitmentDataTable extends DataTable
             Column::make('phone')->title('Phone')->name('recruitments.phone')->orderable(false)->searchable(true),
             Column::make('country_name')->title('Country')->name('countries.name')->orderable(false)->searchable(true),
             Column::make('source_name')->title('Source')->name('recruitment_sources.name')->orderable(false)->searchable(true),
-            Column::computed('call_logs')->title('Call Logs')->orderable(false)->searchable(false),
+            Column::computed('call_logs')->title('Call Logs')->orderable(false)->searchable(false)->width(500),
             Column::computed('status_badge')->title('Status')->orderable(false)->searchable(true)->width(100),
             Column::computed('action')->title('Action')->exportable(false)->printable(false)->orderable(false)->searchable(false)->addClass('text-nowrap'),
         ];
