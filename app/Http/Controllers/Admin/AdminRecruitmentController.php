@@ -34,7 +34,8 @@ class AdminRecruitmentController extends Controller
         
         // Sort the commissions
         $commissions = $commissions->sortByDesc(function ($commission) {
-            return $commission->payment?->user?->created_at;
+            //return $commission->payment?->user?->created_at;
+            return $commission->status;
         });
 
         // Calculate total paid and unpaid amounts

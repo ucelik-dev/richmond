@@ -19,13 +19,12 @@ class RecruitmentDataTable extends DataTable
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
         return (new EloquentDataTable($query))
-            // Name block: name + phone + email
-            ->addColumn('name_cell', function ($r) {
-                $html  = '<div class="text-nowrap fw-semibold">'.e($r->name ?: '—').'</div>';
-                if ($r->phone) $html .= '<div class="text-secondary">'.e($r->phone).'</div>';
-                if ($r->email) $html .= '<div class="text-secondary">'.e($r->email).'</div>';
-                return $html;
-            })
+            
+            // Name (plain)
+            ->editColumn('name', fn ($r) => e($r->name ?: '—'))
+
+            // Phone (plain; show em-dash when empty)
+            ->editColumn('phone', fn ($r) => e($r->phone ?: '—'))
 
             // Country (already selected as country_name)
             ->addColumn('country_name', fn($r) => e($r->country_name ?? '—'))
@@ -84,6 +83,17 @@ class RecruitmentDataTable extends DataTable
             ->filterColumn('status_badge', function ($q, $kw) {
                 $kw = trim($kw, '^$ ');
                 if ($kw !== '') $q->where('recruitment_statuses.name', $kw);
+            })
+            // Name only
+            ->filterColumn('name', function ($q, $kw) {
+                $kw = trim($kw);
+                if ($kw !== '') $q->where('recruitments.name', 'like', "%{$kw}%");
+            })
+
+            // Phone only
+            ->filterColumn('phone', function ($q, $kw) {
+                $kw = trim($kw);
+                if ($kw !== '') $q->where('recruitments.phone', 'like', "%{$kw}%");
             })
 
             ->rawColumns(['name_cell','status_badge','action'])
@@ -227,7 +237,8 @@ class RecruitmentDataTable extends DataTable
     {
         return [
             Column::make('id')->title('#')->width(50)->orderable(true)->searchable(false),
-            Column::computed('name_cell')->title('Name')->orderable(false)->searchable(true),
+            Column::make('name')->title('Name')->name('recruitments.name')->orderable(false)->searchable(true),
+            Column::make('phone')->title('Phone')->name('recruitments.phone')->orderable(false)->searchable(true),
             Column::make('country_name')->title('Country')->name('countries.name')->orderable(false)->searchable(true),
             Column::make('source_name')->title('Source')->name('recruitment_sources.name')->orderable(false)->searchable(true),
             Column::computed('call_logs')->title('Call Logs')->orderable(false)->searchable(false),
