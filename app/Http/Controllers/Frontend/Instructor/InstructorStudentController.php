@@ -13,7 +13,7 @@ class InstructorStudentController extends Controller
         $instructorId = Auth::user()->id;
 
         // Get all students from all groups belonging to this instructor
-        $students = User::with(['country'])
+        $students = User::with(['country','awardingBodyRegistrations'])
             ->whereHas('enrollments.group', function ($query) use ($instructorId) {
                 $query->where('instructor_id', $instructorId);
             })

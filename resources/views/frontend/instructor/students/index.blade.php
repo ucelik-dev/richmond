@@ -35,6 +35,7 @@
                                                     <th>COURSE</th>
                                                     <th>GROUP</th>
                                                     <th>BATCH</th>
+                                                    <th>AWARDING BODY</th>
                                                     <th>STATUS</th>
                                                 </tr>
                                             </thead>
@@ -78,6 +79,27 @@
                                                                     </span><br>
                                                                 @endif
                                                             @endforeach
+                                                        </td>
+
+                                                        <td class="text-nowrap">
+                                                            @forelse($student->awardingBodyRegistrations as $registration) 
+                                                                @if($registration?->awardingBody)
+                                                                    <div class="text-secondary"> 
+                                                                        <span class="d-inline-block fw-bold me-2" style="width:50px;">Name</span><span>: {{ $registration?->awardingBody->name }}</span><br>
+                                                                        <span class="d-inline-block fw-bold me-2" style="width:50px;">Level</span><span>: {{ $registration?->registrationLevel->name }}</span><br>
+                                                                        <span class="d-inline-block fw-bold me-2" style="width:50px;">Number</span><span>: {{ $registration?->awarding_body_registration_number }}</span><br>
+                                                                        <span class="d-inline-block fw-bold me-2" style="width:50px;">Date</span><span>: {{ $registration?->awarding_body_registration_date }}</span>
+                                                                        <hr class="m-1">
+                                                                    </div>
+                                                                @endif
+                                                       
+                                                            @empty
+                                                                @php
+                                                                    $paid = $student->payments?->flatMap->installments->where('status','paid')->sum('amount') ?? 0;
+                                                                @endphp
+                                                                {!! $paid >= 1000 ? '<span class="badge bg-yellow text-white">To be registered</span>' : '<span class="badge bg-danger">Insufficient payment</span>' !!}
+                                                          
+                                                            @endforelse
                                                         </td>
                                                        
                                                         <td class="text-nowrap">
