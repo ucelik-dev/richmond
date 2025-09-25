@@ -250,8 +250,39 @@ class RecruitmentDataTable extends DataTable
             ])
             ->buttons([
                 Button::make('colvis')->className('btn btn-primary py-1 px-2'),
-                Button::make('excel')->className('btn btn-primary py-1 px-2'),
-                Button::make('print')->className('btn btn-primary py-1 px-2'),
+
+                Button::make('excel')
+                    ->className('btn btn-primary py-1 px-2')
+                    ->exportOptions([
+                        'columns'   => ':visible:not(.no-print)',
+                        'stripHtml' => true,
+                        'format'    => [
+                            // keep only the plain TH title
+                            'header' => 'function (data, idx) {
+                                var $h = $("<div>").html(data);
+                                $h.find(".dt-filter").remove(); // drop selects/inputs in TH
+                                return $.trim($h.text());
+                            }',
+                        ],
+                    ]),
+
+                    Button::make('print')
+                        ->className('btn btn-primary py-1 px-2')
+                        ->exportOptions([
+                            'columns'   => ':visible:not(.no-print)',
+                            'stripHtml' => true,
+                            'format'    => [
+                                'header' => 'function (data, idx) {
+                                    var $h = $("<div>").html(data);
+                                    $h.find(".dt-filter").remove();
+                                    return $.trim($h.text());
+                                }',
+                            ],
+                        ])
+                        // hide any leftover header filters in the print window just in case
+                        ->customize('function (win) {
+                            $(win.document.head).append("<style>.dt-filter{display:none !important}</style>");
+                        }'),
             ]);
     }
 
@@ -265,7 +296,7 @@ class RecruitmentDataTable extends DataTable
             Column::make('source_name')->title('Source')->name('recruitment_sources.name')->orderable(false)->searchable(true),
             Column::computed('call_logs')->title('Call Logs')->orderable(false)->searchable(false)->width(500),
             Column::computed('status_badge')->title('Status')->orderable(false)->searchable(true)->width(100),
-            Column::computed('action')->title('Action')->exportable(false)->printable(false)->orderable(false)->searchable(false)->addClass('text-nowrap'),
+            Column::computed('action')->title('Action')->exportable(false)->printable(false)->orderable(false)->searchable(false)->addClass('text-nowrap')->addClass('no-print'),
         ];
     }
 

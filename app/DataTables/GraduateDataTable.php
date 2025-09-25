@@ -233,8 +233,39 @@ class GraduateDataTable extends DataTable
             ])
             ->buttons([
                 Button::make('colvis')->className('btn btn-primary py-1 px-2'),
-                Button::make('excel')->className('btn btn-primary py-1 px-2'),
-                Button::make('print')->className('btn btn-primary py-1 px-2'),
+
+                Button::make('excel')
+                    ->className('btn btn-primary py-1 px-2')
+                    ->exportOptions([
+                        'columns'   => ':visible:not(.no-print)',
+                        'stripHtml' => true,
+                        'format'    => [
+                            // keep only the plain TH title
+                            'header' => 'function (data, idx) {
+                                var $h = $("<div>").html(data);
+                                $h.find(".dt-filter").remove(); // drop selects/inputs in TH
+                                return $.trim($h.text());
+                            }',
+                        ],
+                    ]),
+
+                    Button::make('print')
+                        ->className('btn btn-primary py-1 px-2')
+                        ->exportOptions([
+                            'columns'   => ':visible:not(.no-print)',
+                            'stripHtml' => true,
+                            'format'    => [
+                                'header' => 'function (data, idx) {
+                                    var $h = $("<div>").html(data);
+                                    $h.find(".dt-filter").remove();
+                                    return $.trim($h.text());
+                                }',
+                            ],
+                        ])
+                        // hide any leftover header filters in the print window just in case
+                        ->customize('function (win) {
+                            $(win.document.head).append("<style>.dt-filter{display:none !important}</style>");
+                        }'),
             ]);
     }
 
@@ -253,7 +284,7 @@ class GraduateDataTable extends DataTable
             Column::make('job_title')->title('Job Title')->name('graduates.job_title')->orderable(false)->searchable(true)->visible(false),
             Column::computed('job_start_text')->title('Job Start')->orderable(true)->searchable(true)->visible(false),
             Column::make('note')->title('Note')->name('graduates.note')->orderable(false)->searchable(true),
-            Column::computed('action')->title('Action')->exportable(false)->printable(false)->orderable(false)->searchable(false)->addClass('text-nowrap'),
+            Column::computed('action')->title('Action')->exportable(false)->printable(false)->orderable(false)->searchable(false)->addClass('text-nowrap')->addClass('no-print'),
         ];
     }
 

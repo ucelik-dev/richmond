@@ -298,8 +298,39 @@ class CommissionDataTable extends DataTable
             ])
             ->buttons([
                 Button::make('colvis')->className('btn btn-primary py-1 px-2'),
-                Button::make('excel')->className('btn btn-primary py-1 px-2'),
-                Button::make('print')->className('btn btn-primary py-1 px-2'),
+
+                Button::make('excel')
+                    ->className('btn btn-primary py-1 px-2')
+                    ->exportOptions([
+                        'columns'   => ':visible:not(.no-print)',
+                        'stripHtml' => true,
+                        'format'    => [
+                            // keep only the plain TH title
+                            'header' => 'function (data, idx) {
+                                var $h = $("<div>").html(data);
+                                $h.find(".dt-filter").remove(); // drop selects/inputs in TH
+                                return $.trim($h.text());
+                            }',
+                        ],
+                    ]),
+
+                    Button::make('print')
+                        ->className('btn btn-primary py-1 px-2')
+                        ->exportOptions([
+                            'columns'   => ':visible:not(.no-print)',
+                            'stripHtml' => true,
+                            'format'    => [
+                                'header' => 'function (data, idx) {
+                                    var $h = $("<div>").html(data);
+                                    $h.find(".dt-filter").remove();
+                                    return $.trim($h.text());
+                                }',
+                            ],
+                        ])
+                        // hide any leftover header filters in the print window just in case
+                        ->customize('function (win) {
+                            $(win.document.head).append("<style>.dt-filter{display:none !important}</style>");
+                        }'),
             ]);
     }
 
@@ -318,7 +349,7 @@ class CommissionDataTable extends DataTable
             Column::computed('status_badge')->title('Status')->orderable(false)->searchable(true)->width(90),
             Column::make('paid_at_text')->title('Payment Date')->name('commissions.paid_at')->orderable(true)->searchable(true)->width(120),
             Column::make('note')->title('Note')->orderable(false)->searchable(true)->visible(false),
-            Column::computed('action')->title('Action')->exportable(false)->printable(false)->orderable(false)->searchable(false)->addClass('text-nowrap'),
+            Column::computed('action')->title('Action')->exportable(false)->printable(false)->orderable(false)->searchable(false)->addClass('text-nowrap')->addClass('no-print'),
         ];
     }
 

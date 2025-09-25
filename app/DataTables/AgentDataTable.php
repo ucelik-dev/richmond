@@ -512,8 +512,39 @@ class AgentDataTable extends DataTable
             ])
             ->buttons([
                 Button::make('colvis')->className('btn btn-primary py-1 px-2'),
-                Button::make('excel')->className('btn btn-primary py-1 px-2'),
-                Button::make('print')->className('btn btn-primary py-1 px-2'),
+
+                Button::make('excel')
+                    ->className('btn btn-primary py-1 px-2')
+                    ->exportOptions([
+                        'columns'   => ':visible:not(.no-print)',
+                        'stripHtml' => true,
+                        'format'    => [
+                            // keep only the plain TH title
+                            'header' => 'function (data, idx) {
+                                var $h = $("<div>").html(data);
+                                $h.find(".dt-filter").remove(); // drop selects/inputs in TH
+                                return $.trim($h.text());
+                            }',
+                        ],
+                    ]),
+
+                    Button::make('print')
+                        ->className('btn btn-primary py-1 px-2')
+                        ->exportOptions([
+                            'columns'   => ':visible:not(.no-print)',
+                            'stripHtml' => true,
+                            'format'    => [
+                                'header' => 'function (data, idx) {
+                                    var $h = $("<div>").html(data);
+                                    $h.find(".dt-filter").remove();
+                                    return $.trim($h.text());
+                                }',
+                            ],
+                        ])
+                        // hide any leftover header filters in the print window just in case
+                        ->customize('function (win) {
+                            $(win.document.head).append("<style>.dt-filter{display:none !important}</style>");
+                        }'),
             ]);
     }
 
@@ -534,7 +565,7 @@ class AgentDataTable extends DataTable
             Column::make('login_count')->title('Login Count')->name('users.login_count')->orderable(true)->searchable(true)->width(80)->visible(false),
             Column::make('last_login_at')->title('Last Login')->name('users.last_login_at')->orderable(true)->searchable(true)->addClass('text-nowrap')->visible(false),
             Column::make('last_login_ip')->title('Last IP')->name('users.last_login_ip')->orderable(false)->searchable(true)->addClass('text-nowrap')->visible(false),
-            Column::computed('action')->title('Action')->exportable(false)->printable(false)->orderable(false)->searchable(false)->addClass('text-nowrap'),
+            Column::computed('action')->title('Action')->exportable(false)->printable(false)->orderable(false)->searchable(false)->addClass('text-nowrap')->addClass('no-print'),
         ];
     }
 

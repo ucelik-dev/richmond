@@ -16347,3 +16347,153 @@ footer {
     color:crimson;
     font-weight: bold;
 }
+
+
+/* =========================================================
+   DataTable Format (pagination + inputs/selects)
+   ======================================================= */
+
+/* Pagination ------------------------------------------------ */
+.dataTables_wrapper .dataTables_paginate { margin: 0; }
+.dataTables_wrapper .dataTables_paginate .pagination { gap: .25rem; }
+
+/* Base look */
+.dataTables_wrapper .dataTables_paginate .page-link {
+  padding: .25rem .55rem;
+  border-radius: .5rem;
+  background-color: #f8fafc;
+  border: 1px solid #dee2e6;
+  color: #334155;
+  line-height: 1.2;
+}
+
+/* Hover (all items) */
+.dataTables_wrapper .dataTables_paginate .page-item:not(.disabled) .page-link:hover {
+  color: #182433;
+  border-color: #182433;
+  background-color: #eef2f6;
+}
+
+/* Active page number */
+.dataTables_wrapper .dataTables_paginate .page-item.active .page-link {
+  background-color: #182433;
+  border-color: #182433;
+  color: #fff;
+}
+
+/* Outline style for First/Prev/Next/Last (clickable state) */
+.dataTables_wrapper .dataTables_paginate .page-item.first .page-link,
+.dataTables_wrapper .dataTables_paginate .page-item.previous .page-link,
+.dataTables_wrapper .dataTables_paginate .page-item.next .page-link,
+.dataTables_wrapper .dataTables_paginate .page-item.last .page-link {
+  background-color: transparent;
+  color: #182433;
+}
+
+/* Disabled */
+.dataTables_wrapper .dataTables_paginate .page-item.disabled .page-link {
+  background-color: #f1f3f5;
+  border-color: #e9ecef;
+  color: #adb5bd;
+}
+
+/* Remove focus ring / halo on pager links */
+.dataTables_wrapper .dataTables_paginate .page-link,
+.dataTables_wrapper .dataTables_paginate .page-link:hover,
+.dataTables_wrapper .dataTables_paginate .page-link:focus,
+.dataTables_wrapper .dataTables_paginate .page-link:focus-visible,
+.dataTables_wrapper .dataTables_paginate .page-link:active {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Length menu ------------------------------------------------ */
+.dataTables_wrapper .dataTables_length label {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+/* The select itself */
+.dataTables_wrapper .dataTables_length select.form-select {
+  min-width: 72px;
+  padding: .25rem 2rem .25rem .5rem;
+  height: 32px;
+  border-radius: .5rem;
+  line-height: 1.2;
+}
+
+.dataTables_wrapper .dataTables_length select.form-select:focus {
+  border-color: #182433;
+  box-shadow: none;
+}
+.dataTables_wrapper .dataTables_length select.form-select:hover {
+  border-color: #182433;
+}
+
+/* =========================================================
+   GLOBAL input/select styling INSIDE DataTables
+   (header filters, footer filters, and any other controls)
+   ======================================================= */
+
+/* Size & typography for ALL controls in the wrapper */
+.dataTables_wrapper .form-control,
+.dataTables_wrapper .form-select,
+.dataTables_wrapper textarea.form-control {
+  font-size: 0.85rem;          /* <- increase text size */
+  line-height: 1.25;
+  height: 32px;                 /* unified compact height */
+  padding-top: .20rem;          /* compact vertical padding */
+  padding-bottom: .20rem;
+  border-radius: .5rem;
+}
+
+.dataTables_wrapper .form-control::placeholder {
+  font-size: inherit;
+  opacity: .65;
+}
+
+/* Remove blue glow on focus for ALL inputs/selects in DT */
+.dataTables_wrapper .form-control:focus,
+.dataTables_wrapper .form-select:focus,
+.dataTables_wrapper textarea.form-control:focus,
+.dataTables_wrapper .form-control:focus-visible,
+.dataTables_wrapper .form-select:focus-visible {
+  box-shadow: none !important;
+  outline: 0 !important;
+  border-color: #d0d5dd !important; /* neutral; tweak if you want darker */
+}
+
+/* =========================================================
+   Header filters (the ones you inject via .dt-filter)
+   ======================================================= */
+.dataTables_wrapper .dt-filter {
+  height: 30px;                 /* a touch smaller than global */
+  font-size: 0.85rem;
+  line-height: 1.2;
+  padding-top: .20rem;
+  padding-bottom: .20rem;
+}
+
+/* Header selects: keep right padding for caret */
+select.dt-filter.form-select {
+  padding-right: 2rem;
+}
+
+/* Tabler variable helpers (optional) */
+select.dt-filter.form-select {
+  --tblr-input-padding-y: .200rem;
+  --tblr-input-btn-padding-y: .200rem;
+}
+
+/* DataTables Buttons: white text only */
+.dataTables_wrapper .dt-buttons .btn {
+  color: #fff !important;
+}
+.dataTables_wrapper .dt-buttons .btn:hover,
+.dataTables_wrapper .dt-buttons .btn:focus {
+  color: #fff !important;
+}
+
+

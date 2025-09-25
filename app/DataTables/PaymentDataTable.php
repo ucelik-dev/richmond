@@ -365,10 +365,41 @@ class PaymentDataTable extends DataTable
                     ->orderBy(0)
                     ->selectStyleSingle()
                     ->buttons([
-                        Button::make('colvis')->className('btn btn-primary py-1 px-2'),
-                        Button::make('excel')->className('btn btn-primary py-1 px-2'),
-                        Button::make('print')->className('btn btn-primary py-1 px-2'),
-                    ]);
+                Button::make('colvis')->className('btn btn-primary py-1 px-2'),
+
+                Button::make('excel')
+                    ->className('btn btn-primary py-1 px-2')
+                    ->exportOptions([
+                        'columns'   => ':visible:not(.no-print)',
+                        'stripHtml' => true,
+                        'format'    => [
+                            // keep only the plain TH title
+                            'header' => 'function (data, idx) {
+                                var $h = $("<div>").html(data);
+                                $h.find(".dt-filter").remove(); // drop selects/inputs in TH
+                                return $.trim($h.text());
+                            }',
+                        ],
+                    ]),
+
+                    Button::make('print')
+                        ->className('btn btn-primary py-1 px-2')
+                        ->exportOptions([
+                            'columns'   => ':visible:not(.no-print)',
+                            'stripHtml' => true,
+                            'format'    => [
+                                'header' => 'function (data, idx) {
+                                    var $h = $("<div>").html(data);
+                                    $h.find(".dt-filter").remove();
+                                    return $.trim($h.text());
+                                }',
+                            ],
+                        ])
+                        // hide any leftover header filters in the print window just in case
+                        ->customize('function (win) {
+                            $(win.document.head).append("<style>.dt-filter{display:none !important}</style>");
+                        }'),
+            ]);
     }
 
     public function getColumns(): array
@@ -388,7 +419,7 @@ class PaymentDataTable extends DataTable
             Column::computed('commissions_summary')->title('Commissions')->orderable(false)->searchable(true)->addClass('text-nowrap'),
             Column::make('status_name')->title('Status')->name('payment_statuses.name')->orderable(false)->searchable(true)->width(150),
             Column::make('notes')->title('Notes')->orderable(false)->searchable(true)->visible(false),
-            Column::computed('action')->title('Action')->exportable(false)->printable(false)->addClass('text-nowrap')->width(50),
+            Column::computed('action')->title('Action')->exportable(false)->printable(false)->addClass('text-nowrap')->width(50)->addClass('no-print'),
         ];
     }
 

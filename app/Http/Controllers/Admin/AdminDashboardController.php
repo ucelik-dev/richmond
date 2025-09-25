@@ -23,9 +23,9 @@ class AdminDashboardController extends Controller
 
         // Student status 
         $studentStatusCounts = User::whereHas('roles', function ($q) {
-        $q->where('name', 'student')
-          ->where('user_roles.is_main', true);
-    })
+            $q->where('name', 'student')
+            ->where('user_roles.is_main', true);
+        })
         ->select('user_status_id', DB::raw('COUNT(*) as count'))
         ->with('userStatus')
         ->groupBy('user_status_id')
@@ -33,6 +33,17 @@ class AdminDashboardController extends Controller
         ->orderByRaw("FIELD(user_statuses.name, 'graduated', 'withdrawn') ASC")
         ->orderBy('user_statuses.order')
         ->get();
+        /* $studentStatusCounts = User::whereHas('roles', function ($q) {
+            $q->where('name', 'student')
+            ->where('user_roles.is_main', 1);
+        })
+        ->join('user_statuses as us', 'users.user_status_id', '=', 'us.id')
+        ->whereRaw('LOWER(us.name) <> ?', ['withdrawn'])       // exclude Withdrawn
+        ->select('users.user_status_id', DB::raw('COUNT(*) as count'))
+        ->groupBy('users.user_status_id')
+        ->with('userStatus')
+        ->orderBy('us.order')
+        ->get(); */
         $studentStatusTotal = $studentStatusCounts->sum('count');
 
         $studentStatusCountsInRange = User::whereHas('roles', function ($q) {
@@ -66,6 +77,9 @@ class AdminDashboardController extends Controller
         $studentRegistrationsThisWeek = User::whereHas('roles', function ($q) { $q->where('name', 'student')->where('user_roles.is_main', true); })->whereBetween('created_at', [$startOfWeek, $now])->count();
         $studentRegistrationsThisMonth = User::whereHas('roles', function ($q) { $q->where('name', 'student')->where('user_roles.is_main', true); })->whereBetween('created_at', [$startOfMonth, $now])->count();
         $studentRegistrationsThisYear = User::whereHas('roles', function ($q) { $q->where('name', 'student')->where('user_roles.is_main', true); })->whereBetween('created_at', [$startOfYear, $now])->count();
+        
+        // exclude Withdrawn students
+        /* $studentRegistrationsAll = User::whereHas('roles', function ($q) { $q->where('name', 'student')->where('user_roles.is_main', 1);  })->whereHas('userStatus', function ($q) { $q->whereRaw('LOWER(name) <> ?', ['withdrawn']);  })->count(); */
         $studentRegistrationsAll = User::whereHas('roles', function ($q) { $q->where('name', 'student')->where('user_roles.is_main', true); })->count();
         $studentRegistrationsInRange = User::whereHas('roles', function ($q) { $q->where('name', 'student')->where('user_roles.is_main', true); })->whereBetween('created_at', [$startDate, $endDate])->count();
 

@@ -8,7 +8,9 @@
     <meta name="base_url" content="{{ url('/') }}">
     <meta name="csrf_token" content="{{ csrf_token() }}">
 
-    <title>EduCore - Online Courses</title>
+    <title>Richmond College</title>
+
+    <link rel="icon" type="image/png" href="{{ asset('default/favicon-32x32.png') }}">
     
     <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/all.min.css') }}">
@@ -31,16 +33,53 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
     
     <!-- Font Awesome CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-MzJx...==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5…" crossorigin="anonymous" referrerpolicy="no-referrer">
 
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/spacing.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/responsive.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/assets/css/frontend.css') }}">
 
+    {{-- DataTables Bootstrap 5 CSS (v1.x) --}}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+
+    <style>
+        /* Make ONLY the top DT buttons white */
+        .dataTables_wrapper .dt-buttons > .btn,
+        .dataTables_wrapper .dt-buttons > .btn-group > .btn,
+        .dataTables_wrapper .dt-buttons > .btn > span,
+        .dataTables_wrapper .dt-buttons > .btn-group > .btn > span { 
+            color: #fff !important;
+            background-color: #667382;
+        }
+
+        /* Keep the Column visibility dropdown items readable */
+        div.dt-button-collection .btn,
+        div.dt-button-collection .dt-button,
+        div.dt-button-collection .dropdown-item {
+            color: #212529 !important;
+        }
+
+        /* If your theme uses Bootstrap variables, force white as well */
+        .dataTables_wrapper .dt-buttons > .btn {
+            --bs-btn-color: #fff !important;
+            --bs-btn-hover-color: #fff !important;
+        }
+        .dataTables_wrapper table.dataTable thead th {
+            font-size: .75rem;
+        }
+
+    </style>
+
+
+
+
     {{-- @vite(['resources/js/frontend/course.js']) --}}
 
     @stack('header_scripts')
+    
 </head>
 
 <body class="home_3">
@@ -140,8 +179,33 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+     <!-- DATATABLES -->
+      {{-- DataTables core (v1.x) + Bootstrap 5 integration --}}
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+
+    {{-- Buttons (only if you enabled buttons in your DataTable) --}}
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.colVis.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+    <!-- DATATABLES -->
+
     <!--main/custom js-->
     <script src="{{ asset('frontend/assets/js/main.js') }}"></script>
+
+    <script>
+        // Stop DataTables from wrapping buttons in .btn-group
+        if ($.fn.dataTable && $.fn.dataTable.Buttons) {
+            $.fn.dataTable.Buttons.defaults.dom.container.className = 'dt-buttons d-inline-flex gap-2';
+        }
+    </script>
 
     @stack('scripts')
 
