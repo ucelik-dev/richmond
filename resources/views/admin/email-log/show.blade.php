@@ -63,17 +63,23 @@
                     </div>
 
                     <h4 class="mt-3 mb-2"><i class="fa-solid fa-paperclip"></i> Attachments</h4>
-                    <div class="mt-0">
-                        @foreach(data_get($emailLog->meta, 'attachments', []) as $att)
-                            @php
-                                $path = is_array($att) ? $att['path'] ?? '' : $att;
-                                $name = is_array($att) ? $att['name'] ?? basename($path) : basename($path);
-                            @endphp
-                            @if($path)
-                                <a href="{{ asset($path) }}" target="_blank">{{ $name }}</a><br>
-                            @endif
+                    {{-- under the preview card --}}
+                    @if($attachments->isNotEmpty())
+                    <div class="mt-3">
+                        <h5 class="mb-2">Attachments</h5>
+                        @foreach($attachments as $i => $att)
+                        <div>
+                            <a href="{{ $att['url'] }}" target="_blank" rel="noopener">
+                            {{ $att['name'] }}
+                            </a>
+                            {{-- or use secure download route: --}}
+                            {{-- <a href="{{ route('admin.email-log.attachment.download', [$emailLog->id, $i]) }}">{{ $att['name'] }}</a> --}}
+                        </div>
                         @endforeach
                     </div>
+                    @else
+                    <div class="mt-3 text-muted">No attachments</div>
+                    @endif
 
                 </div>
             </div>

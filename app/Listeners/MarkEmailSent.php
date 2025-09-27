@@ -3,28 +3,50 @@
 namespace App\Listeners;
 
 use App\Models\EmailLog;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Events\MessageSent;
-use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\Log;
 
 class MarkEmailSent
 {
-
-    // app/Listeners/MarkEmailSent.php
-    public function handle(\Illuminate\Mail\Events\MessageSent $event): void
+    public function handle(MessageSent $event): void
     {
-        $headers = $event->message->getHeaders();
-        $logKey  = optional($headers->get('X-Log-Key'))->getValue();
-        if (!$logKey) return;
+        $msg     = $event->message;                 // Symfony\Component\Mime\Email
+        $headers = $msg->getHeaders();
 
-        $messageId = optional($headers->get('Message-ID'))->getValue();
+        // the Message-ID returned by the transport (strip < > if present)
+        $messageId = trim((string) $headers->getHeaderBody('Message-ID'));
+        $messageId = $messageId ? trim($messageId, '<>') : null;
 
-        \App\Models\EmailLog::where('log_key', $logKey)->update([
-            'message_id' => $messageId,
+        // our correlation header (we add this in LogEmailBeforeSending)
+        $logKey = (string) $headers->getHeaderBody('X-Log-Key');
+
+        $data = [
             'status'     => 'sent',
+            'message_id' => $messageId,
             'sent_at'    => now(),
-        ]);
+        ];
+
+        $updated = 0;
+
+        if ($logKey) {
+            $updated = EmailLog::where('log_key', $logKey)->update($data);
+        }
+
+        // fallback: match by Message-ID if we couldn’t match by log_key
+        if (!$updated && $messageId) {
+            $updated = EmailLog::whereNull('message_id')
+                ->where('status', 'sending')
+                ->latest('id')
+                ->limit(1)
+                ->update($data);
+        }
+
+        // (optional) log for troubleshooting
+        if (!$updated) {
+            Log::warning('MarkEmailSent did not match any row', [
+                'log_key'    => $logKey,
+                'message_id' => $messageId,
+            ]);
+        }
     }
-
-
 }

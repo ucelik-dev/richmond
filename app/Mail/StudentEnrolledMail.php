@@ -16,13 +16,8 @@ class StudentEnrolledMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $student;
-
     /* Create a new message instance. */
-    public function __construct(User $student)
-    {
-        $this->student = $student;
-    }
+    public function __construct(public User $student, public ?string $logKey = null) {}
 
     /* Get the message envelope. */
     public function envelope(): Envelope
@@ -41,22 +36,34 @@ class StudentEnrolledMail extends Mailable
         );
     }
 
+    public function headers(): Headers
+    {
+        $srcRel = 'mail/student-agreement.pdf';
+        $meta = [['name' => 'Student Agreement.pdf', 'path' => $srcRel]];
+
+        $text = [
+            'X-App-Mailable' => static::class,
+            'X-User-ID'      => (string) $this->student->id,
+            'X-Attachments'  => json_encode($meta),
+        ];
+        if (!empty($this->logKey)) {
+            $text['X-Log-Key'] = (string) $this->logKey;  // only if you have one
+        }
+
+        return new Headers(text: $text);
+    }
+
+    
     /* Get the attachments for the message. */
     public function attachments(): array
     {
-        return [
-            Attachment::fromPath(public_path('mail/student-agreement.pdf')),
-        ];
-    }
+        // where you actually put the PDF:
+        $full = public_path('mail/student-agreement.pdf');
 
-    public function headers(): Headers
-    {
-        return new Headers(
-            text: [
-                'X-App-Mailable' => static::class,
-                'X-User-ID'      => (string) $this->student->id,
-            ]
-        );
+        return is_file($full)
+        ? [Attachment::fromPath($full)->as('Student Agreement.pdf')->withMime('application/pdf')]
+        : [];
+
     }
 
 }
