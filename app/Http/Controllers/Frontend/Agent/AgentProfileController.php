@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Frontend\Agent;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Agent\AgentPasswordUpdateRequest;
-use App\Http\Requests\Agent\AgentProfileUpdateRequest;
-use App\Http\Requests\Agent\AgentSocialUpdateRequest;
+use App\Http\Requests\Frontend\Agent\AgentPasswordUpdateRequest;
+use App\Http\Requests\Frontend\Agent\AgentProfileUpdateRequest;
+use App\Http\Requests\Frontend\Agent\AgentSocialUpdateRequest;
 use App\Models\Country;
 use App\Models\SocialPlatform;
 use App\Models\User;
@@ -27,7 +27,7 @@ class AgentProfileController extends Controller
     }
 
     function updateProfile(AgentProfileUpdateRequest $request) {
-        $user = Auth::user(); // get the currently logged-in user
+        $user = Auth::user(); 
 
         if($request->hasFile('avatar')){
             $avatarPath = $this->uploadFile($request->file('avatar'), 'uploads/profile-images', 'image');
