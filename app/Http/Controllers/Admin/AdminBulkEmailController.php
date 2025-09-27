@@ -43,7 +43,7 @@ class AdminBulkEmailController extends Controller
         
         $storedAttachments = [];
         if ($files->isNotEmpty()) {
-            $dayFolder = 'uploads/bulk-email/' . now()->format('Y-m-d');
+            $dayFolder = 'uploads/sent-attachments/bulk/' . now()->format('Y-m-d');
             $absDir = public_path($dayFolder);
             if (!is_dir($absDir)) { @mkdir($absDir, 0775, true); }
 
