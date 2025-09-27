@@ -56,20 +56,38 @@
                             <div class="card-body">
                                 <div class="row align-items-center">
                                     <div class="col">
+
                                         <div class="font-weight-medium d-flex mb-2">
                                             <div class="fw-bold">Students Statuses</div>
                                         </div>
                                         
-                                        @foreach ($studentStatusCounts as $student)
-                                            <div class="d-flex">
-                                                <div class="text-secondary">{{ ucwords($student->userStatus->name) }}</div>
+                                         @foreach ($studentStatusCounts as $student)
+                                            @php
+                                            // what to pass as filter; prefer id (most reliable)
+                                            $statusId = $student->userStatus->id ?? null;
+                                            @endphp
+
+                                            <div class="d-flex position-relative">
+                                                <div class="text-secondary">
+                                                    <a
+                                                        href="{{ route('admin.student.index', ['status' => $statusId]) }}"
+                                                        class="stretched-link text-secondary"
+                                                        aria-label="Filter students by {{ $student->userStatus->name }}"
+                                                    >
+                                                    {{ ucwords($student->userStatus->name) }}
+                                                    </a>
+                                                </div>
                                                 <div class="text-secondary ms-auto">{{ $student->count }}</div>
                                             </div>
                                         @endforeach
-                                        <div class="font-weight-medium d-flex mt-2">
-                                            <div class="fw-bold">Total</div>
+
+                                        <div class="font-weight-medium d-flex mt-2 position-relative">
+                                            <div class="fw-bold">
+                                                <a href="{{ route('admin.student.index') }}" class="stretched-link text-dark">Total</a>
+                                            </div>
                                             <div class="ms-auto fw-bold">{{ $studentStatusTotal }}</div>
                                         </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -85,24 +103,25 @@
                                         <div class="font-weight-medium d-flex mb-2">
                                             <div class="fw-bold">Student Registrations</div>
                                         </div>
-                                        <div class="d-flex">
-                                            <div class="text-secondary">Today</div>
+                                        <div class="d-flex position-relative">
+                                            <div class="text-secondary"><a class="stretched-link text-secondary" href="{{ route('admin.student.index', ['reg' => 'today']) }}">Today</a></div>
                                             <div class="text-secondary ms-auto">{{ $studentRegistrationsToday }}</div>
+                                            
                                         </div>
-                                        <div class="d-flex">
-                                            <div class="text-secondary">This Week</div>
+                                        <div class="d-flex position-relative">
+                                            <div class="text-secondary"><a class="stretched-link text-secondary" href="{{ route('admin.student.index', ['reg' => 'week']) }}">This Week</a></div>
                                             <div class="text-secondary ms-auto">{{ $studentRegistrationsThisWeek }}</div>
                                         </div>
-                                        <div class="d-flex">
-                                            <div class="text-secondary">This Month</div>
+                                        <div class="d-flex position-relative">
+                                            <div class="text-secondary"><a class="stretched-link text-secondary" href="{{ route('admin.student.index', ['reg' => 'month']) }}">This Month</a></div>
                                             <div class="text-secondary ms-auto">{{ $studentRegistrationsThisMonth }}</div>
                                         </div>
-                                        <div class="d-flex">
-                                            <div class="text-secondary">This Year</div>
+                                        <div class="d-flex position-relative">
+                                            <div class="text-secondary"><a class="stretched-link text-secondary" href="{{ route('admin.student.index', ['reg' => 'year']) }}">This Year</a></div>
                                             <div class="text-secondary ms-auto">{{ $studentRegistrationsThisYear }}</div>
                                         </div>
-                                        <div class="d-flex mt-2">
-                                            <div class="fw-bold">Total</div>
+                                        <div class="d-flex mt-2 position-relative">
+                                            <div class="fw-bold"><a class="stretched-link text-dark" href="{{ route('admin.student.index') }}">Total</a></div>
                                             <div class="ms-auto fw-bold">{{ $studentRegistrationsAll }}</div>
                                         </div>
                                        

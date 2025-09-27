@@ -4,6 +4,7 @@ namespace App\DataTables;
 
 use App\Models\User;
 use App\Models\UserStatus;
+use Carbon\Carbon;
 use DB;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Illuminate\Support\Facades\Auth;
@@ -337,46 +338,80 @@ class StudentDataTable extends DataTable
 
     public function query(User $model): QueryBuilder
     {
-        return $model->newQuery()
-        // only users whose MAIN role is 'student'
-        ->whereHas('roles', function ($q) {
-            $q->where('name', 'student');     
-        })
-        ->whereDoesntHave('roles', function ($q) {
-            $q->where('name', 'admin');      
-        })
-        ->whereDoesntHave('roles', function ($q) {
-            $q->where('name', 'manager');      
-        })
-       
-        ->select([
-            'users.id','users.name','users.email','users.contact_email','users.phone','users.image',
-            'users.gender','users.dob','users.city','users.post_code','users.address',
-            'users.country_id','users.account_status','users.created_at','users.login_count','users.last_login_at','users.last_login_ip',
-            'users.sales_person_id','users.agent_id','users.manager_id','users.reference','users.education_status',
-            DB::raw("DATE_FORMAT(users.created_at, '%Y-%m-%d') AS registered_text"),
-            'user_statuses.name  as user_status_name',
-            'user_statuses.color as user_status_color',
-            'countries.name as country_name',
-            'colleges.name as college_name',
-        ])
-        ->leftJoin('user_statuses','user_statuses.id','=','users.user_status_id')
-        ->leftJoin('countries', 'countries.id', '=', 'users.country_id')
-        ->leftJoin('colleges', 'colleges.id', '=', 'users.college_id') 
-        ->with([
-            'country:id,name',
-            'enrollments.course.level',
-            'enrollments.group:id,name,color,instructor_id', 
-            'enrollments.group.instructor:id,name',
-            'enrollments.batch:id,name,color',
-            'awardingBodyRegistrations.awardingBody:id,name',
-            'awardingBodyRegistrations.registrationLevel:id,name',
-            'payments.installments:id,payment_id,amount,status',
-            'salesPerson:id,name',
-            'agent:id,company',
-            'manager:id,name',
-            'graduates:id,user_id,diploma_file,rc_graduation_date',
-        ]);
+        $q = $model->newQuery()
+            // only users whose MAIN role is 'student'
+            ->whereHas('roles', fn ($q) => $q->where('name', 'student'))
+            ->whereDoesntHave('roles', fn ($q) => $q->where('name', 'admin'))
+            ->whereDoesntHave('roles', fn ($q) => $q->where('name', 'manager'))
+
+            ->select([
+                'users.id','users.name','users.email','users.contact_email','users.phone','users.image',
+                'users.gender','users.dob','users.city','users.post_code','users.address',
+                'users.country_id','users.account_status','users.created_at','users.login_count',
+                'users.last_login_at','users.last_login_ip','users.sales_person_id','users.agent_id',
+                'users.manager_id','users.reference','users.education_status',
+                DB::raw("DATE_FORMAT(users.created_at, '%Y-%m-%d') AS registered_text"),
+                'user_statuses.name as user_status_name',
+                'user_statuses.color as user_status_color',
+                'countries.name as country_name',
+                'colleges.name as college_name',
+            ])
+
+            ->leftJoin('user_statuses','user_statuses.id','=','users.user_status_id')
+            ->leftJoin('countries', 'countries.id', '=', 'users.country_id')
+            ->leftJoin('colleges', 'colleges.id', '=', 'users.college_id')
+
+            ->with([
+                'country:id,name',
+                'enrollments.course.level',
+                'enrollments.group:id,name,color,instructor_id',
+                'enrollments.group.instructor:id,name',
+                'enrollments.batch:id,name,color',
+                'awardingBodyRegistrations.awardingBody:id,name',
+                'awardingBodyRegistrations.registrationLevel:id,name',
+                'payments.installments:id,payment_id,amount,status',
+                'salesPerson:id,name',
+                'agent:id,company',
+                'manager:id,name',
+                'graduates:id,user_id,diploma_file,rc_graduation_date',
+            ]);
+
+        // ---- optional filter from dashboard: ?status=ID or ?status=Name ----
+        $statusParam = request('status');
+        if (!is_null($statusParam) && $statusParam !== '') {
+            if (is_numeric($statusParam)) {
+                $q->where('users.user_status_id', (int) $statusParam);
+            } else {
+                $q->whereRaw('LOWER(user_statuses.name) = ?', [mb_strtolower($statusParam)]);
+            }
+        }
+
+         // status filter (if you have one)
+        if ($s = $this->request()->get('status')) {
+            if (is_numeric($s)) $q->where('users.user_status_id', (int)$s);
+            else $q->whereHas('status', fn($qq)=>$qq->where('name',$s));
+        }
+
+        // registration period filter
+        if ($reg = $this->request()->get('reg')) {
+            $now = Carbon::now(config('app.timezone'));
+            switch ($reg) {
+                case 'today':
+                    $q->whereDate('users.created_at', $now->toDateString());
+                    break;
+                case 'week':
+                    $q->whereBetween('users.created_at', [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()]);
+                    break;
+                case 'month':
+                    $q->whereBetween('users.created_at', [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()]);
+                    break;
+                case 'year':
+                    $q->whereBetween('users.created_at', [$now->copy()->startOfYear(), $now->copy()->endOfYear()]);
+                    break;
+            }
+        }
+
+        return $q;
     }
 
     public function html(): HtmlBuilder
@@ -384,7 +419,16 @@ class StudentDataTable extends DataTable
         return $this->builder()
             ->setTableId('students-table')
             ->columns($this->getColumns())
-            ->minifiedAjax()
+            ->ajax([
+            // use the same URL the page is on (index). If you have a separate data route, put it here.
+                'url'  => url()->current(),
+                'type' => 'GET',
+                'data' => 'function (d) {
+                    const qs = new URLSearchParams(window.location.search);
+                    d.status = qs.get("status") || "";  // empty => no filter
+                    d.reg    = qs.get("reg")    || "";  // empty => no filter
+                }',
+            ])
             ->pageLength(50)
             ->orderBy(0)
             ->parameters([
