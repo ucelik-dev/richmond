@@ -311,7 +311,9 @@
                     <td class="wrapper">
                       <h2>Dear, {{ $student->name }}!</h2>
                       <p>Congratulations!</p>
-                      <p>I am pleased to offer you acceptance to the program indicated below!You've made a great choice to begin unlocking your potential.</p>
+                      <p>I am pleased to offer you acceptance to the program indicated below!<br>
+                      You've made a great choice to begin unlocking your potential.</p>
+
                       <p>According to our records, you have applied for the following program(s):
                         <ul>
                           @foreach($student->enrollments as $enrollment)

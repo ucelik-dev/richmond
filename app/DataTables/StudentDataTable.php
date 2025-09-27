@@ -349,7 +349,6 @@ class StudentDataTable extends DataTable
             $q->where('name', 'manager');      
         })
        
-
         ->select([
             'users.id','users.name','users.email','users.contact_email','users.phone','users.image',
             'users.gender','users.dob','users.city','users.post_code','users.address',
@@ -387,6 +386,7 @@ class StudentDataTable extends DataTable
             ->columns($this->getColumns())
             ->minifiedAjax()
             ->pageLength(50)
+            ->orderBy(0)
             ->parameters([
                 'dom' => '<"top d-flex flex-column mb-2"
                             <"d-flex align-items-center justify-content-between flex-column flex-sm-row"
