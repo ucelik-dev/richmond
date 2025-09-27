@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Frontend\Agent;
 
+use App\DataTables\AgentRegistrationsDataTable;
 use App\Http\Controllers\Controller;
 use App\Models\Country;
 use App\Models\User;
@@ -10,7 +11,8 @@ use Illuminate\Support\Facades\Auth;
 
 class AgentRegistrationController extends Controller
 {
-    function index() {
+    function index(AgentRegistrationsDataTable $dataTable) {
+
         $agentId = Auth::id();
         
         // Get all students registered by this agent
@@ -26,7 +28,7 @@ class AgentRegistrationController extends Controller
 
 
         $countries = Country::where('status', 1)->get();
-        
-        return view ('frontend.agent.registration.index', compact('countries','students'));
+
+        return $dataTable->render('frontend.agent.registration.index', compact('students','countries'));
     }
 }

@@ -20,7 +20,6 @@ class InstructorStudentController extends Controller
             })
             ->get();
 
-        //return view('frontend.instructor.students.index', compact('students'));
         return $dataTable->render('frontend.instructor.students.index', compact('students'));
     }
 }

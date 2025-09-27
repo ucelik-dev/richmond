@@ -146,6 +146,19 @@ class User extends Authenticatable
         return $this->hasMany(Commission::class, 'user_id');
     }
 
+    public function agentCommissions()
+    {
+        // Student -> Payments -> Commissions (from any agent)
+        return $this->hasManyThrough(
+            Commission::class,   // far model
+            Payment::class,      // through model
+            'user_id',           // FK on payments -> users.id
+            'payment_id',        // FK on commissions -> payments.id
+            'id',                // local key on users
+            'id'                 // local key on payments
+        );
+    }
+
     // Total commission earned from assigned students
     public function getTotalCommissionAttribute()
     {
