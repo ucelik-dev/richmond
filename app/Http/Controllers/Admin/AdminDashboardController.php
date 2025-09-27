@@ -22,16 +22,7 @@ class AdminDashboardController extends Controller
         $endDate = $request->end_date ?? Carbon::now()->endOfMonth()->toDateString();
 
         // Student status 
-        $studentStatusCounts = User::query()
-        ->whereHas('roles', function ($q) {
-            $q->where('name', 'student');
-        })
-        ->whereDoesntHave('roles', function ($q) {
-            $q->where('name', 'admin');
-        })
-        ->whereDoesntHave('roles', function ($q) {
-            $q->where('name', 'manager');
-        })
+        $studentStatusCounts = User::studentsOnly()
         ->select('user_status_id', DB::raw('COUNT(*) as count'))
         ->with('userStatus')
         ->groupBy('user_status_id')
@@ -69,14 +60,12 @@ class AdminDashboardController extends Controller
         $upcomingInstallmentsPaymentsInRange = Installment::where('status', 'pending')->whereBetween('due_date', [$startDate, $endDate])->sum('amount');
 
         // Student Registration Stats
-        $studentRegistrationsToday = User::whereHas('roles', function ($q) { $q->where('name', 'student')->where('user_roles.is_main', true); })->whereDate('created_at', $today)->count();
-        $studentRegistrationsThisWeek = User::whereHas('roles', function ($q) { $q->where('name', 'student')->where('user_roles.is_main', true); })->whereBetween('created_at', [$startOfWeek, $now])->count();
-        $studentRegistrationsThisMonth = User::whereHas('roles', function ($q) { $q->where('name', 'student')->where('user_roles.is_main', true); })->whereBetween('created_at', [$startOfMonth, $now])->count();
-        $studentRegistrationsThisYear = User::whereHas('roles', function ($q) { $q->where('name', 'student')->where('user_roles.is_main', true); })->whereBetween('created_at', [$startOfYear, $now])->count();
+        $studentRegistrationsToday = User::studentsOnly()->whereDate('created_at', $today)->count();
+        $studentRegistrationsThisWeek = User::studentsOnly()->whereBetween('created_at', [$startOfWeek, $now])->count();
+        $studentRegistrationsThisMonth = User::studentsOnly()->whereBetween('created_at', [$startOfMonth, $now])->count();
+        $studentRegistrationsThisYear = User::studentsOnly()->whereBetween('created_at', [$startOfYear, $now])->count();
         
-        // exclude Withdrawn students
-        /* $studentRegistrationsAll = User::whereHas('roles', function ($q) { $q->where('name', 'student')->where('user_roles.is_main', 1);  })->whereHas('userStatus', function ($q) { $q->whereRaw('LOWER(name) <> ?', ['withdrawn']);  })->count(); */
-        $studentRegistrationsAll = User::whereHas('roles', function ($q) { $q->where('name', 'student')->where('user_roles.is_main', true); })->count();
+        $studentRegistrationsAll = User::studentsOnly()->count();
         $studentRegistrationsInRange = User::whereHas('roles', function ($q) { $q->where('name', 'student')->where('user_roles.is_main', true); })->whereBetween('created_at', [$startDate, $endDate])->count();
 
         // Commission Payment Stats

@@ -176,6 +176,10 @@ class User extends Authenticatable
         return $this->hasMany(Graduate::class);
     }
 
+    public function scopeStudentsOnly($q) {
+        return $q->whereHas('roles', fn($q)=>$q->where('name','student'))->whereDoesntHave('roles', fn($q)=>$q->whereIn('name',['admin','manager']));
+    }
+
     
 
 
