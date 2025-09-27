@@ -164,7 +164,7 @@
                                         <select class="form-control form-select" name="agent_id">
                                             <option value="">Select an agent</option>
                                             @foreach ($agentUsers as $agentUser)
-                                                <option @selected($student->agent_id == $agentUser->id) value="{{ $agentUser->id }}">{{ $agentUser->company }}</option>
+                                                <option @selected($student->agent_id == $agentUser->id) value="{{ $agentUser->id }}">{{ $agentUser->company ? $agentUser->company : $agentUser->name }}</option>
                                             @endforeach
                                         </select>
                                         <x-input-error :messages="$errors->get('agent_id')" class="mt-2 text-danger small" />

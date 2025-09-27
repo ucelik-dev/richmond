@@ -340,9 +340,15 @@ class StudentDataTable extends DataTable
         return $model->newQuery()
         // only users whose MAIN role is 'student'
         ->whereHas('roles', function ($q) {
-            $q->where('roles.name', 'student')
-              ->where('user_roles.is_main', 1);   // pivot column
+            $q->where('name', 'student');     
         })
+        ->whereDoesntHave('roles', function ($q) {
+            $q->where('name', 'admin');      
+        })
+        ->whereDoesntHave('roles', function ($q) {
+            $q->where('name', 'manager');      
+        })
+       
 
         ->select([
             'users.id','users.name','users.email','users.contact_email','users.phone','users.image',

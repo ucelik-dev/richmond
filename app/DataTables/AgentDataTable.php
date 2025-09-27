@@ -347,9 +347,8 @@ class AgentDataTable extends DataTable
 
             // only AGENTS with MAIN role
             ->whereHas('roles', function ($r) {
-                $r->where('roles.name', 'agent')          // scope to agent role
-                ->where('user_roles.is_main', 1);       // use your actual pivot table + column
-                // If your pivot table is named differently, e.g. role_user, use that name here.
+                $r->where('roles.name', 'agent')          
+                ->where('user_roles.is_main', 1);       
             })
 
             ->leftJoin('user_statuses','user_statuses.id','=','users.user_status_id')
