@@ -22,9 +22,15 @@ class AdminDashboardController extends Controller
         $endDate = $request->end_date ?? Carbon::now()->endOfMonth()->toDateString();
 
         // Student status 
-        $studentStatusCounts = User::whereHas('roles', function ($q) {
-            $q->where('name', 'student')
-            ->where('user_roles.is_main', true);
+        $studentStatusCounts = User::query()
+        ->whereHas('roles', function ($q) {
+            $q->where('name', 'student');
+        })
+        ->whereDoesntHave('roles', function ($q) {
+            $q->where('name', 'admin');
+        })
+        ->whereDoesntHave('roles', function ($q) {
+            $q->where('name', 'manager');
         })
         ->select('user_status_id', DB::raw('COUNT(*) as count'))
         ->with('userStatus')
@@ -33,17 +39,7 @@ class AdminDashboardController extends Controller
         ->orderByRaw("FIELD(user_statuses.name, 'graduated', 'withdrawn') ASC")
         ->orderBy('user_statuses.order')
         ->get();
-        /* $studentStatusCounts = User::whereHas('roles', function ($q) {
-            $q->where('name', 'student')
-            ->where('user_roles.is_main', 1);
-        })
-        ->join('user_statuses as us', 'users.user_status_id', '=', 'us.id')
-        ->whereRaw('LOWER(us.name) <> ?', ['withdrawn'])       // exclude Withdrawn
-        ->select('users.user_status_id', DB::raw('COUNT(*) as count'))
-        ->groupBy('users.user_status_id')
-        ->with('userStatus')
-        ->orderBy('us.order')
-        ->get(); */
+
         $studentStatusTotal = $studentStatusCounts->sum('count');
 
         $studentStatusCountsInRange = User::whereHas('roles', function ($q) {
