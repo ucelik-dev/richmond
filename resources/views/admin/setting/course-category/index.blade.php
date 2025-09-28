@@ -11,7 +11,7 @@
                     </h2>
                 </div>
                 <div class="col-auto text-end">
-                    <a href="{{ route('admin.setting.index') }}" class="btn btn-primary">
+                    <a href="{{ route('admin.setting.index') }}" class="btn btn-dark px-2 py-1 px-md-3 py-md-2">
                         <i class="fa-solid fa-arrow-left me-2"></i>
                         Back
                     </a>
@@ -27,7 +27,7 @@
                 <div class="card-header">
                     <h3 class="card-title">COURSE CATEGORIES</h3>
                     <div class="card-actions">
-                        <a href="{{ route('admin.setting-course-category.create') }}" class="btn btn-primary">
+                        <a href="{{ route('admin.setting-course-category.create') }}" class="btn btn-dark px-2 py-1 px-md-3 py-md-2">
                             <i class="fa-solid fa-plus me-2"></i>
                             Add new
                         </a>

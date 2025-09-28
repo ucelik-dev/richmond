@@ -54,7 +54,7 @@ class AdminPaymentController extends Controller
         $paymentStatuses = PaymentStatus::where('status', 1)->get();
 
         // Filter users who are students and have enrollments
-        $students = User::with('enrollments')->whereHas('mainRoleRelation', fn ($q) => $q->where('name', 'student'))
+        $students = User::with('enrollments')->studentsOnly()
             ->whereHas('enrollments') // must have at least one enrollment
             ->with(['enrollments.course.level']) // eager load course & level
             ->get()

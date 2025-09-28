@@ -11,7 +11,7 @@
                     </h2>
                 </div>
                 <div class="col-auto text-end">
-                    <a href="{{ route('admin.setting-user-status.index') }}" class="btn btn-primary">
+                    <a href="{{ route('admin.setting-user-status.index') }}" class="btn btn-dark px-2 py-1 px-md-3 py-md-2">
                         <i class="fa-solid fa-arrow-left me-2"></i>
                         Back
                     </a>
@@ -69,15 +69,7 @@
                                 </div>
                             </div>
 
-                            <div class="row">
-                                <div class="col-xl-12 mt-3">
-                                    <div class="add_course_basic_info_input">
-                                        <div class="add_course_basic_info_input d-flex gap-2">
-                                            <button type="submit" class="btn btn-primary mt_20">Update</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <button type="submit" class="btn btn-dark px-2 py-1 px-md-3 py-md-2 mt-2">Update</button>
 
                         </form>
 

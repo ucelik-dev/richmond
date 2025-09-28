@@ -7,7 +7,7 @@
                 <div class="card-header">
                     <h3 class="card-title">GRADUATE UPDATE</h3>
                     <div class="card-actions">
-                        <a href="{{ route('admin.graduate.index') }}" class="btn btn-default">
+                        <a href="{{ route('admin.graduate.index') }}" class="btn btn-dark px-2 py-1 px-md-3 py-md-2">
                             <i class="fa-solid fa-arrow-left me-2"></i>
                             Back
                         </a>
@@ -140,7 +140,8 @@
 
                             </div>
 
-                            <button type="submit" class="btn btn-default mt-4">Update</button>
+                            <button type="submit" class="btn btn-dark px-2 py-1 px-md-3 py-md-2 mt-2">Update</button>
+                            
                         </form>
                     </div>
                 </div>

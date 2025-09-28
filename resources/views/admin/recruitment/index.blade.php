@@ -87,7 +87,7 @@
                     <h3 class="card-title">RECRUITMENTS</h3>
                     <div class="card-actions">
                         @can('create_admin_recruitments')
-                            <a href="{{ route('admin.recruitment.create') }}" class="btn btn-default">
+                            <a href="{{ route('admin.recruitment.create') }}" class="btn btn-dark px-2 py-1 px-md-3 py-md-2">
                                 <i class="fa-solid fa-plus me-2"></i>
                                 Add new
                             </a>

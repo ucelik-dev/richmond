@@ -7,7 +7,7 @@
                 <div class="card-header">
                     <h3 class="card-title">MANAGER CREATE</h3>
                     <div class="card-actions">
-                        <a href="{{ route('admin.manager.index') }}" class="btn btn-default">
+                        <a href="{{ route('admin.manager.index') }}" class="btn btn-dark px-2 py-1 px-md-3 py-md-2">
                             <i class="fa-solid fa-arrow-left me-2"></i>
                             Back
                         </a>
@@ -284,9 +284,9 @@
 
 
                             <div class="row">
-                                <div class="col-xl-12 mt-3">
+                                <div class="col-xl-12">
                                     <div class="add_course_basic_info_input">
-                                        <button type="submit" class="btn btn-default mt_20">Create</button>
+                                        <button type="submit" class="btn btn-dark px-2 py-1 px-md-3 py-md-2 mt-4">Create</button>
                                     </div>
                                 </div>
                             </div>

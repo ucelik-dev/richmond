@@ -66,10 +66,10 @@
 
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">PAYMENTS</h3>
+                    <h3 class="card-title">PAYMENTS ( <span id="payment-total" class="text-center" style="font-size:.95rem;font-weight:bold">—</span> )</h3>
                     <div class="card-actions">
                         @if(auth()->user()?->canResource('admin_payments','create'))
-                            <a href="{{ route('admin.payment.create') }}" class="btn btn-default">
+                            <a href="{{ route('admin.payment.create') }}" class="btn btn-dark px-2 py-1 px-md-3 py-md-2">
                                 <i class="fa-solid fa-plus me-2"></i>
                                 Add new
                             </a>
@@ -88,4 +88,19 @@
 
 @push('scripts')
     {{ $dataTable->scripts(attributes: ['type' => 'module']) }}
+
+        <script type="module">
+        // When the DataTable loads/reloads, update the total
+        const updateExpenseTotal = () => {
+            const table = $('#payment-table').DataTable();
+            const json = table.ajax.json() || {};
+            const text = (json.total_amount_text !== undefined) ?
+                json.total_amount_text :
+                (json.total_amount !== undefined ? json.total_amount : '—');
+            $('#payment-total').text(text);
+        };
+
+        // Hook into DataTables events
+        $(document).on('xhr.dt draw.dt', '#payment-table', updateExpenseTotal);
+    </script>
 @endpush

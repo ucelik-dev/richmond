@@ -46,51 +46,51 @@ class AdminDashboardController extends Controller
         // Dates
         $now = Carbon::now();
         $today = $now->copy()->startOfDay();
-        $startOfWeek = $now->copy()->startOfWeek();
-        $startOfMonth = $now->copy()->startOfMonth();
-        $startOfYear = $now->copy()->startOfYear();
+        $startOfWeek = $now->copy()->startOfWeek(); $endOfWeek = $now->copy()->endOfWeek();
+        $startOfMonth = $now->copy()->startOfMonth(); $endOfMonth = $now->copy()->endOfMonth();
+        $startOfYear = $now->copy()->startOfYear(); $endOfYear = $now->copy()->endOfYear();
 
         // Installment Payment Stats
         $installmentsPaidToday = Installment::where('status', 'paid')->whereDate('paid_at', $today)->sum('amount');
-        $installmentsPaidThisWeek = Installment::where('status', 'paid')->whereBetween('paid_at', [$startOfWeek, $now])->sum('amount');
-        $installmentsPaidThisMonth = Installment::where('status', 'paid')->whereBetween('paid_at', [$startOfMonth, $now])->sum('amount');
-        $installmentsPaidThisYear = Installment::where('status', 'paid')->whereBetween('paid_at', [$startOfYear, $now])->sum('amount');
+        $installmentsPaidThisWeek = Installment::where('status', 'paid')->whereBetween('paid_at', [$startOfWeek, $endOfWeek])->sum('amount');
+        $installmentsPaidThisMonth = Installment::where('status', 'paid')->whereBetween('paid_at', [$startOfMonth, $endOfMonth])->sum('amount');
+        $installmentsPaidThisYear = Installment::where('status', 'paid')->whereBetween('paid_at', [$startOfYear, $endOfYear])->sum('amount');
         $installmentsPaidAll = Installment::where('status', 'paid')->sum('amount');
         $installmentsPaidInRange = Installment::where('status', 'paid')->whereBetween('paid_at', [$startDate, $endDate])->sum('amount');
         $upcomingInstallmentsPaymentsInRange = Installment::where('status', 'pending')->whereBetween('due_date', [$startDate, $endDate])->sum('amount');
 
         // Student Registration Stats
         $studentRegistrationsToday = User::studentsOnly()->whereDate('created_at', $today)->count();
-        $studentRegistrationsThisWeek = User::studentsOnly()->whereBetween('created_at', [$startOfWeek, $now])->count();
-        $studentRegistrationsThisMonth = User::studentsOnly()->whereBetween('created_at', [$startOfMonth, $now])->count();
-        $studentRegistrationsThisYear = User::studentsOnly()->whereBetween('created_at', [$startOfYear, $now])->count();
+        $studentRegistrationsThisWeek = User::studentsOnly()->whereBetween('created_at', [$startOfWeek, $endOfWeek])->count();
+        $studentRegistrationsThisMonth = User::studentsOnly()->whereBetween('created_at', [$startOfMonth, $endOfMonth])->count();
+        $studentRegistrationsThisYear = User::studentsOnly()->whereBetween('created_at', [$startOfYear, $endOfYear])->count();
         
         $studentRegistrationsAll = User::studentsOnly()->count();
         $studentRegistrationsInRange = User::whereHas('roles', function ($q) { $q->where('name', 'student')->where('user_roles.is_main', true); })->whereBetween('created_at', [$startDate, $endDate])->count();
 
         // Commission Payment Stats
         $commissionsPaidToday = Commission::where('status', 'paid')->whereDate('paid_at', $today)->sum('amount');
-        $commissionsPaidThisWeek = Commission::where('status', 'paid')->whereBetween('paid_at', [$startOfWeek, $now])->sum('amount');
-        $commissionsPaidThisMonth = Commission::where('status', 'paid')->whereBetween('paid_at', [$startOfMonth, $now])->sum('amount');
-        $commissionsPaidThisYear = Commission::where('status', 'paid')->whereBetween('paid_at', [$startOfYear, $now])->sum('amount');
+        $commissionsPaidThisWeek = Commission::where('status', 'paid')->whereBetween('paid_at', [$startOfWeek, $endOfWeek])->sum('amount');
+        $commissionsPaidThisMonth = Commission::where('status', 'paid')->whereBetween('paid_at', [$startOfMonth, $endOfMonth])->sum('amount');
+        $commissionsPaidThisYear = Commission::where('status', 'paid')->whereBetween('paid_at', [$startOfYear, $endOfYear])->sum('amount');
         $commissionsPaidAll = Commission::where('status', 'paid')->sum('amount');
         $commissionsPaidInRange = Commission::where('status', 'paid')->whereBetween('paid_at', [$startDate, $endDate])->sum('amount');
         $upcomingCommissionsPaymentsInRange = Commission::where('status', 'unpaid')->whereBetween('paid_at', [$startDate, $endDate])->sum('amount');
 
         // Expense Payment Stats
         $expensesPaidToday = Expense::where('status', 'paid')->whereDate('expense_date', $today)->sum(DB::raw('amount + transaction_fee'));
-        $expensesPaidThisWeek = Expense::where('status', 'paid')->whereBetween('expense_date', [$startOfWeek, $now])->sum(DB::raw('amount + transaction_fee'));
-        $expensesPaidThisMonth = Expense::where('status', 'paid')->whereBetween('expense_date', [$startOfMonth, $now])->sum(DB::raw('amount + transaction_fee'));
-        $expensesPaidThisYear = Expense::where('status', 'paid')->whereBetween('expense_date', [$startOfYear, $now])->sum(DB::raw('amount + transaction_fee'));
+        $expensesPaidThisWeek = Expense::where('status', 'paid')->whereBetween('expense_date', [$startOfWeek, $endOfWeek])->sum(DB::raw('amount + transaction_fee'));
+        $expensesPaidThisMonth = Expense::where('status', 'paid')->whereBetween('expense_date', [$startOfMonth, $endOfMonth])->sum(DB::raw('amount + transaction_fee'));
+        $expensesPaidThisYear = Expense::where('status', 'paid')->whereBetween('expense_date', [$startOfYear, $endOfYear])->sum(DB::raw('amount + transaction_fee'));
         $expensesPaidAll = Expense::where('status', 'paid')->sum(DB::raw('amount + transaction_fee'));
         $expensesPaidInRange = Expense::where('status', 'paid')->whereBetween('expense_date', [$startDate, $endDate])->sum(DB::raw('amount + transaction_fee'));
         $upcomingExpensesPaymentsInRange = Expense::where('status', 0)->whereBetween('expense_date', [$startDate, $endDate])->sum(DB::raw('amount + transaction_fee'));
         
         // Income Payment Stats
         $incomesPaidToday = Income::where('status', 'paid')->whereDate('income_date', $today)->sum('amount');
-        $incomesPaidThisWeek = Income::where('status', 'paid')->whereBetween('income_date', [$startOfWeek, $now])->sum('amount');
-        $incomesPaidThisMonth = Income::where('status', 'paid')->whereBetween('income_date', [$startOfMonth, $now])->sum('amount');
-        $incomesPaidThisYear = Income::where('status', 'paid')->whereBetween('income_date', [$startOfYear, $now])->sum('amount');
+        $incomesPaidThisWeek = Income::where('status', 'paid')->whereBetween('income_date', [$startOfWeek, $endOfWeek])->sum('amount');
+        $incomesPaidThisMonth = Income::where('status', 'paid')->whereBetween('income_date', [$startOfMonth, $endOfMonth])->sum('amount');
+        $incomesPaidThisYear = Income::where('status', 'paid')->whereBetween('income_date', [$startOfYear, $endOfYear])->sum('amount');
         $incomesPaidAll = Income::where('status', 'paid')->sum('amount');
         $incomesPaidInRange = Income::where('status', 'paid')->whereBetween('income_date', [$startDate, $endDate])->sum('amount');
         $upcomingIncomesPaymentsInRange = Income::where('status', 0)->whereBetween('income_date', [$startDate, $endDate])->sum('amount');

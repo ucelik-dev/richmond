@@ -11,7 +11,7 @@
                     </h2>
                 </div>
                 <div class="col-auto text-end">
-                    <a href="{{ route('admin.setting-course-category.index') }}" class="btn btn-primary">
+                    <a href="{{ route('admin.setting-course-category.index') }}" class="btn btn-dark px-2 py-1 px-md-3 py-md-2">
                         <i class="fa-solid fa-arrow-left me-2"></i>
                         Back
                     </a>
@@ -50,7 +50,8 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary mt-4">Create</button>
+                        <button type="submit" class="btn btn-dark px-2 py-1 px-md-3 py-md-2 mt-2">Create</button>
+                        
                     </form>
                 </div>
             </div>

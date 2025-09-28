@@ -11,7 +11,7 @@
                     </h2>
                 </div>
                 <div class="col-auto text-end">
-                    <a href="{{ route('admin.setting-user-role.index') }}" class="btn btn-primary">
+                    <a href="{{ route('admin.setting-user-role.index') }}" class="btn btn-dark px-2 py-1 px-md-3 py-md-2">
                         <i class="fa-solid fa-arrow-left me-2"></i>
                         Back
                     </a>
@@ -58,23 +58,22 @@
                                 </div>
 
                                 <div class="col-xl-12">
-    <div class="general_form_input">
-        <label for="#" class="label-required">Assign to Roles</label>
-        <select class="form-control select2-multiple" name="roles[]" multiple>
-            @foreach ($roles as $role)
-                <option value="{{ $role->id }}" {{ in_array($role->id, old('roles', [])) ? 'selected' : '' }}>
-                    {{ ucwords($role->name) }}
-                </option>
-            @endforeach
-        </select>
-        <x-input-error :messages="$errors->get('roles')" class="mt-2 text-danger small" />
-    </div>
-</div>
-                                
+                                    <div class="general_form_input">
+                                        <label for="#" class="label-required">Assign to Roles</label>
+                                        <select class="form-control select2-multiple" name="roles[]" multiple>
+                                            @foreach ($roles as $role)
+                                                <option value="{{ $role->id }}" {{ in_array($role->id, old('roles', [])) ? 'selected' : '' }}>
+                                                    {{ ucwords($role->name) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <x-input-error :messages="$errors->get('roles')" class="mt-2 text-danger small" />
+                                    </div>
+                                </div>
                                 
                             </div>
 
-                        <button type="submit" class="btn btn-primary mt-4">Create</button>
+                        <button type="submit" class="btn btn-dark px-2 py-1 px-md-3 py-md-2 mt-2">Create</button>
                     </form>
                 </div>
             </div>

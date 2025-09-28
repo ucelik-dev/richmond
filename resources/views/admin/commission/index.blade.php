@@ -4,21 +4,22 @@
     <div class="page-body">
         <div class="container-xl">
             <div class="card">
+
                 <div class="card-header">
-                    <h3 class="card-title">COMMISSIONS</h3>
+                    <h3 class="card-title">COMMISSIONS (<span id="commission-total" class="text-center" style="font-size:.95rem; font-weight:bold">—</span>)</h3>
                     <div class="card-actions">
-                        @if(auth()->user()?->canResource('admin_commissions','create'))
-                            <a href="{{ route('admin.commission.create') }}" class="btn btn-default">
-                                <i class="fa-solid fa-plus me-2"></i>
-                                Add new
+                        @if (auth()->user()?->canResource('admin_commissions', 'create'))
+                            <a href="{{ route('admin.commission.create') }}" class="btn btn-dark px-2 py-1 px-md-3 py-md-2">
+                                <i class="fa-solid fa-plus me-2"></i> Add new
                             </a>
                         @endif
                     </div>
                 </div>
+
                 <div class="card-body table-responsive">
-                    
+
                     {{ $dataTable->table() }}
-                    
+
                 </div>
             </div>
         </div>
@@ -27,4 +28,14 @@
 
 @push('scripts')
     {{ $dataTable->scripts(attributes: ['type' => 'module']) }}
+
+    <script type="module">
+        // Update the total badge whenever the table data is (re)loaded
+        $(document).on('xhr.dt', '#commission-table', function(e, settings, json) {
+            if (!json) return;
+            const text = json.total_amount_text ?? (json.total_amount ?? '—');
+            const el = document.getElementById('commission-total');
+            if (el) el.textContent = ' ' + text + ' ';
+        });
+    </script>
 @endpush

@@ -9,7 +9,7 @@
                 <div class="card-header">
                     <h3 class="card-title">MODULE UPDATE</h3>
                     <div class="card-actions">
-                        <a href="{{ route('admin.module.index') }}" class="btn btn-default">
+                        <a href="{{ route('admin.module.index') }}" class="btn btn-dark px-2 py-1 px-md-3 py-md-2">
                             <i class="fa-solid fa-arrow-left me-2"></i>
                             Back
                         </a>
@@ -132,8 +132,8 @@
                                         <x-input-error :messages="$errors->get('order')" class="mt-2 text-danger small" />
                                     </div>
                                 </div>
-                                <div class="col-xl-12 mt-4">
-                                    <button type="submit" class="btn btn-default mt_20">Save</button>
+                                <div class="col-xl-12">
+                                    <button type="submit" class="btn btn-dark px-2 py-1 px-md-3 py-md-2 mt-2">Update</button>
                                 </div>
                                 
                             </div>

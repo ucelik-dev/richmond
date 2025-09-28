@@ -4,6 +4,7 @@ namespace App\DataTables;
 
 use App\Models\Commission;
 use App\Models\Role;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\EloquentDataTable;
@@ -18,7 +19,7 @@ class CommissionDataTable extends DataTable
     {
         $norm = function ($s) { return preg_replace('/[^\d.]/', '', (string) $s); };
 
-        return (new EloquentDataTable($query))
+        $dt = (new EloquentDataTable($query))
             ->addColumn('payee_cell', function ($r) {
                 $txt = $r->payee_company ?: ($r->payee_user_name ?: ($r->fallback_payee_name ?: '-'));
                 return e($txt);
@@ -147,11 +148,20 @@ class CommissionDataTable extends DataTable
 
             ->rawColumns(['role_badge','student_course','status_badge','action'])
             ->setRowId('id');
+
+            // Compute total amount for the CURRENT server-side filters (URL params)
+            $sum = (clone $query)->sum('commissions.amount');
+
+            // Add both raw and formatted values to the response payload
+            return $dt->with([
+                'total_amount'       => $sum,
+                'total_amount_text'  => currency_format($sum),
+            ]);
     }
 
     public function query(Commission $model): QueryBuilder
     {
-        return $model->newQuery()
+        $q = $model->newQuery()
             ->select([
                 'commissions.*',
                 'users.company as payee_company',
@@ -159,24 +169,66 @@ class CommissionDataTable extends DataTable
                 'commissions.payee_name as fallback_payee_name',
                 \DB::raw("DATE_FORMAT(commissions.paid_at, '%Y-%m-%d') as paid_at_text"),
             ])
-
-            // main role of the payee as a subselect (agent/sales); NULL => external
             ->selectSub(function ($q) {
                 $q->from('roles')
-                  ->join('user_roles', 'user_roles.role_id', '=', 'roles.id')
-                  ->whereColumn('user_roles.user_id', 'commissions.user_id')
-                  ->where('user_roles.is_main', 1)
-                  ->select('roles.name')
-                  ->limit(1);
+                ->join('user_roles', 'user_roles.role_id', '=', 'roles.id')
+                ->whereColumn('user_roles.user_id', 'commissions.user_id')
+                ->where('user_roles.is_main', 1)
+                ->select('roles.name')
+                ->limit(1);
             }, 'role_name')
-
             ->leftJoin('users', 'users.id', '=', 'commissions.user_id')
-
             ->with([
                 'payment.user:id,name',
                 'payment.course.level',
                 'user.roles' => function ($q) { $q->select('roles.id','roles.name'); },
             ]);
+
+        /* ---------- Optional filters from query string ---------- */
+
+        // 1) Period from dashboard: ?commission=today|week|month|year
+        $commission = request('commission');
+        $commissionFrom = request('commission_from');
+        $commissionTo   = request('commission_to');
+
+        if ($commission || $commissionFrom || $commissionTo) {
+            $now  = Carbon::now(config('app.timezone'));
+            $from = $commissionFrom ? Carbon::parse($commissionFrom)->startOfDay() : null;
+            $to   = $commissionTo   ? Carbon::parse($commissionTo)->endOfDay()     : null;
+
+            if ($commission && !$from && !$to) {
+                switch ($commission) {
+                    case 'today': $from = $now->copy()->startOfDay();  $to = $now->copy()->endOfDay();   break;
+                    case 'week':  $from = $now->copy()->startOfWeek(); $to = $now->copy()->endOfWeek();  break;
+                    case 'month': $from = $now->copy()->startOfMonth();$to = $now->copy()->endOfMonth(); break;
+                    case 'year':  $from = $now->copy()->startOfYear(); $to = $now->copy()->endOfYear();  break;
+                }
+            }
+
+            if ($from) $q->where('commissions.paid_at', '>=', $from);
+            if ($to)   $q->where('commissions.paid_at', '<=', $to);
+
+            // Dashboard intent: paid commissions in the window
+            $q->where('commissions.status', 'paid');
+        }
+
+        // 2) Optional quick filters via URL
+        if ($st = strtolower((string) request('status'))) {
+            if (in_array($st, ['paid','unpaid'], true)) {
+                $q->where('commissions.status', $st);
+            }
+        }
+        if ($role = strtolower((string) request('role'))) {
+            if ($role === 'external') {
+                $q->whereNull('commissions.user_id');
+            } else {
+                $q->whereHas('user.roles', function ($r) use ($role) {
+                    $r->where('roles.name', $role)->where('user_roles.is_main', 1);
+                });
+            }
+        }
+
+        return $q;
     }
 
     public function html(): HtmlBuilder
@@ -184,7 +236,19 @@ class CommissionDataTable extends DataTable
         return $this->builder()
             ->setTableId('commission-table')
             ->columns($this->getColumns())
-            ->minifiedAjax()
+            ->ajax([
+                'url'  => url()->current(),
+                'type' => 'GET',
+                'data' => 'function(d){
+                    const qs = new URLSearchParams(window.location.search);
+                    d.commission       = qs.get("commission")       || "";   // today|week|month|year
+                    d.commission_from  = qs.get("commission_from")  || "";   // optional YYYY-MM-DD
+                    d.commission_to    = qs.get("commission_to")    || "";   // optional YYYY-MM-DD
+                    d.role      = qs.get("role")                    || "";   // agent|sales|external (optional)
+                    const s = qs.get("status");
+                    if (s !== null) d.status = s;  // only send if present in URL
+                }',
+            ])
             ->pageLength(50)
             ->orderBy(0)
             ->parameters([

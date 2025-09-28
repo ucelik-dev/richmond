@@ -20,7 +20,7 @@ class SendStudentInstallmentReminders extends Command
         $today = now()->startOfDay();
 
         $stages = [
-            ['offset' =>  2,  'stage' => 'due_2_days_before',  'require_unpaid' => false],
+            ['offset' =>  2,  'stage' => 'due_2_days_before',  'require_unpaid' => true],
             ['offset' => -1,  'stage' => 'late_1_day_after',   'require_unpaid' => true],
             ['offset' => -30, 'stage' => 'late_1_month_after', 'require_unpaid' => true],
         ];

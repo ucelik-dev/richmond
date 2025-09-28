@@ -7,7 +7,7 @@
                 <div class="card-header">
                     <h3 class="card-title">MANAGE PERMISSIONS ({{ $user->name }})</h3>
                     <div class="card-actions">
-                        <a href="{{ route('admin.user.index') }}" class="btn btn-primary">
+                        <a href="{{ route('admin.user.index') }}" class="btn btn-dark px-2 py-1 px-md-3 py-md-2">
                             <i class="fa-solid fa-arrow-left me-2"></i>
                             Back
                         </a>
@@ -101,11 +101,11 @@
                                 </div>
                                 @endforeach
 
-                            <div class="d-flex justify-content-end mt-3">
+                            <div class="d-flex justify-content-end">
                                 <div class="add_course_basic_info_input">
                                     <div class="add_course_basic_info_input d-flex gap-2">
-                                        <button type="submit" name="action" value="save_exit" class="btn btn-primary mt_20">Update</button>
-                                        <button type="submit" name="action" value="save_stay" class="btn btn-secondary mt_20">Update & Stay</button>
+                                        <button type="submit" name="action" value="save_exit" class="btn btn-dark px-2 py-1 px-md-3 py-md-2 mt-2">Update</button>
+                                        <button type="submit" name="action" value="save_stay" class="btn btn-secondary px-2 py-1 px-md-3 py-md-2 mt-2">Update & Stay</button>
                                     </div>
                                 </div>
                             </div>

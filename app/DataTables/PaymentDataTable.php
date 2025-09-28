@@ -12,8 +12,7 @@ use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Button;
 use Yajra\DataTables\Html\Column;
-use Yajra\DataTables\Html\Editor\Editor;
-use Yajra\DataTables\Html\Editor\Fields;
+use App\Models\Installment;
 use Yajra\DataTables\Services\DataTable;
 
 class PaymentDataTable extends DataTable
@@ -21,7 +20,7 @@ class PaymentDataTable extends DataTable
 
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
-        return (new EloquentDataTable($query))
+        $dt= (new EloquentDataTable($query))
             ->addIndexColumn()
 
             ->editColumn('user_name', function ($row) {
@@ -154,8 +153,6 @@ class PaymentDataTable extends DataTable
                 });
             })
 
-
-
             // STATUS badge
             ->editColumn('status_name', function ($row) {
                 $label = ucwords($row->status_name) ?? '—';
@@ -183,6 +180,43 @@ class PaymentDataTable extends DataTable
     
             ->rawColumns(['user_name','courses_badges','installments_summary','commissions_summary','status_name','created_at','action'])
             ->setRowId('id');
+
+            /* ---- HEADER TOTAL (sum of PAID installments in the same window) ---- */
+            $paid     = request('paid');       // today|week|month|year
+            $paidFrom = request('paid_from');  // YYYY-MM-DD
+            $paidTo   = request('paid_to');    // YYYY-MM-DD
+
+            $from = $paidFrom ? \Carbon\Carbon::parse($paidFrom)->startOfDay() : null;
+            $to   = $paidTo   ? \Carbon\Carbon::parse($paidTo)->endOfDay()     : null;
+
+            if ($paid && !$from && !$to) {
+                $now = \Carbon\Carbon::now(config('app.timezone'));
+                switch ($paid) {
+                    case 'today': $from = $now->copy()->startOfDay();   $to = $now->copy()->endOfDay();   break;
+                    case 'week':  $from = $now->copy()->startOfWeek();  $to = $now->copy()->endOfWeek();  break;
+                    case 'month': $from = $now->copy()->startOfMonth(); $to = $now->copy()->endOfMonth(); break;
+                    case 'year':  $from = $now->copy()->startOfYear();  $to = $now->copy()->endOfYear();  break;
+                }
+            }
+
+            $sum = Installment::query()
+                ->where('status', 'paid')
+                ->when($from, fn($q) => $q->where('paid_at', '>=', $from))
+                ->when($to,   fn($q) => $q->where('paid_at', '<=', $to))
+                ->whereHas('payment', function ($pq) {
+                    // same Payment filters used in query()
+                    $pq->whereHas('user.roles', fn($r) => $r->where('name', 'student'));
+                    if ($statusId = request('status_id')) $pq->where('payments.status_id', $statusId);
+                    if ($userId   = request('user_id'))   $pq->where('payments.user_id', $userId);
+                })
+                ->sum('amount');
+
+            return $dt->with([
+                'total_amount'      => $sum,
+                'total_amount_text' => currency_format($sum),
+            ]);
+
+            
     }
 
     public function query(Payment $model): QueryBuilder
@@ -190,56 +224,68 @@ class PaymentDataTable extends DataTable
         $q = $model->newQuery()
             // sums are still handy if you show a total anywhere
             ->withSum('commissions as commissions_total', 'amount')
-
             // eager-load what you'll render (no N+1):
             ->with([
                 'installments:id,payment_id,amount,due_date,status,paid_at',
-
                 'commissions:id,payment_id,user_id,payee_name,amount,status,paid_at',
                 'commissions.user:id,name',
                 'commissions.user.mainRoleRelation:id,name',
                 'commissions.user.roles:id,name',
-
             ])
-
-            // base select + joins for columns/aliases you display
             ->select([
-                'payments.id',
-                'payments.user_id',
-                'payments.total',
-                'payments.amount',
-                'payments.discount',
-                'payments.status_id',
-                'payments.notes',
-
-                'users.name  as user_name',
-                'users.email as user_email',
-                'users.contact_email as user_contact_email',
-                'users.phone as user_phone',
-
-                'payment_statuses.name as status_name',
-                'payment_statuses.color as status_color',
-
-                'courses.title as course_title',
-                'course_levels.name as level_name',   
-
+                'payments.id','payments.user_id','payments.total','payments.amount','payments.discount','payments.status_id','payments.notes',
+                'users.name  as user_name','users.email as user_email','users.contact_email as user_contact_email','users.phone as user_phone',
+                'payment_statuses.name as status_name','payment_statuses.color as status_color',
+                'courses.title as course_title','course_levels.name as level_name',   
                 DB::raw("DATE_FORMAT(users.created_at, '%Y-%m-%d') AS registered_text"),
-
             ])
             ->leftJoin('users', 'users.id', '=', 'payments.user_id')
             ->leftJoin('payment_statuses', 'payment_statuses.id', '=', 'payments.status_id')
             ->leftJoin('courses', 'courses.id', '=', 'payments.course_id')
             ->leftJoin('course_levels',  'course_levels.id',  '=', 'courses.level_id');
 
-        // optional filters you already had
-        if ($status = request('status_id')) {
-            $q->where('payments.status_id', $status);
-        }
-        if ($userId = request('user_id')) {
-            $q->where('payments.user_id', $userId);
-        }
+            // keep payments that belong to (main) students; exclude admin/manager users
+            $q->whereHas('user.roles', function ($r) {
+                $r->where('name','student');
+            });
 
-        return $q; // IMPORTANT: no ->get(), let Yajra page with start/length
+            // existing optional filters
+            if ($status = request('status_id')) $q->where('payments.status_id', $status);
+            if ($userId = request('user_id'))   $q->where('payments.user_id', $userId);
+
+            // ---- NEW: paid installments time filter ----
+            $paid = request('paid'); // today|week|month|year
+            $paidFrom = request('paid_from');
+            $paidTo   = request('paid_to');
+
+            if ($paid || $paidFrom || $paidTo) {
+                $now = Carbon::now(config('app.timezone'));
+                $from = $paidFrom ? Carbon::parse($paidFrom)->startOfDay() : null;
+                $to   = $paidTo   ? Carbon::parse($paidTo)->endOfDay()     : null;
+
+                if ($paid && !$from && !$to) {
+                    switch ($paid) {
+                        case 'today': $from = $now->copy()->startOfDay();  $to = $now->copy()->endOfDay(); break;
+                        case 'week':  $from = $now->copy()->startOfWeek();  $to = $now->copy()->endOfWeek(); break;
+                        case 'month': $from = $now->copy()->startOfMonth(); $to = $now->copy()->endOfMonth(); break;
+                        case 'year':  $from = $now->copy()->startOfYear();  $to = $now->copy()->endOfYear(); break;
+                    }
+                }
+
+                // Only include payments having at least one PAID installment in the window
+                $q->whereHas('installments', function ($iq) use ($from, $to) {
+                    $iq->where('status','paid');
+                    if ($from && $to) {
+                        $iq->whereBetween('paid_at', [$from, $to]);
+                    } elseif ($from) {
+                        $iq->where('paid_at', '>=', $from);
+                    } elseif ($to) {
+                        $iq->where('paid_at', '<=', $to);
+                    }
+                });
+            }
+
+            return $q;
     }
 
     public function html(): HtmlBuilder
@@ -247,7 +293,18 @@ class PaymentDataTable extends DataTable
         return $this->builder()
                     ->setTableId('payment-table')
                     ->columns($this->getColumns())
-                    ->minifiedAjax()
+                    ->ajax([
+                        'url'  => url()->current(),   // index route
+                        'type' => 'GET',
+                        'data' => 'function(d){
+                            const qs = new URLSearchParams(window.location.search);
+                            d.paid     = qs.get("paid")     || "";   // today|week|month|year
+                            d.paid_from= qs.get("paid_from")|| "";   // optional explicit range
+                            d.paid_to  = qs.get("paid_to")  || "";
+                            d.status_id= qs.get("status_id")|| "";
+                            d.user_id  = qs.get("user_id")  || "";
+                        }',
+                    ])
                     ->pageLength(50)
                     ->parameters([
 

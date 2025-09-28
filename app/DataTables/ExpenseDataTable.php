@@ -4,6 +4,7 @@ namespace App\DataTables;
 
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use Carbon\Carbon;
 use DB;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Illuminate\Support\Facades\Auth;
@@ -11,8 +12,6 @@ use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Button;
 use Yajra\DataTables\Html\Column;
-use Yajra\DataTables\Html\Editor\Editor;
-use Yajra\DataTables\Html\Editor\Fields;
 use Yajra\DataTables\Services\DataTable;
 
 class ExpenseDataTable extends DataTable
@@ -20,7 +19,7 @@ class ExpenseDataTable extends DataTable
 
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
-        return (new EloquentDataTable($query))
+        $dt = (new EloquentDataTable($query))
             ->addIndexColumn()
 
             ->editColumn('amount', fn($r) => \currency_format($r->amount))
@@ -83,11 +82,27 @@ class ExpenseDataTable extends DataTable
 
             ->rawColumns(['status','action'])
             ->setRowId('id');
+
+            // ---- TOTAL FOR HEADER ----
+            // Clone the filtered base query but strip select/order/limit to avoid aggregate errors
+            $sumQ = $query
+                ->cloneWithout(['columns','orders','limit','offset'])
+                ->cloneWithoutBindings(['select','order']);
+
+            // Sum of filtered rows (change to + transaction_fee if you prefer)
+            $sumAmount = (clone $sumQ)->sum('expenses.amount');
+            $sumTransactionFee = (clone $sumQ)->sum('expenses.transaction_fee');
+            $sum = $sumAmount+$sumTransactionFee;
+
+            return $dt->with([
+                'total_amount'      => $sum,
+                'total_amount_text' => currency_format($sum),
+            ]);
     }
 
     public function query(Expense $model): QueryBuilder
     {
-        return $model->newQuery()
+        $q = $model->newQuery()
             ->leftJoin('expense_categories as ec', 'ec.id', '=', 'expenses.expense_category_id')
             ->leftJoin('users as u', 'u.id', '=', 'expenses.user_id')
             ->select([
@@ -96,11 +111,62 @@ class ExpenseDataTable extends DataTable
                 'expenses.transaction_fee',
                 'expenses.status',
                 'expenses.note',
-                'expenses.expense_date',              
+                'expenses.expense_date',
                 'ec.name as category_name',
                 'u.name as user_name',
                 DB::raw("DATE_FORMAT(expenses.expense_date, '%Y-%m-%d') AS date_text"),
             ]);
+
+
+            // --- Period from dashboard: ?expense=today|week|month|year ---
+            if ($expense = request('expense')) {
+                $now = Carbon::now(config('app.timezone'));
+                [$from, $to] = match ($expense) {
+                    'today' => [$now->copy()->startOfDay(),  $now->copy()->endOfDay()],
+                    'week'  => [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()],
+                    'month' => [$now->copy()->startOfMonth(),$now->copy()->endOfMonth()],
+                    'year'  => [$now->copy()->startOfYear(), $now->copy()->endOfYear()],
+                    default => [null, null],
+                };
+
+                if ($from && $to) {
+                    $q->whereBetween('expenses.expense_date', [$from, $to]);
+                }
+            }
+
+            // --- Explicit range: ?expense_from=YYYY-MM-DD&expense_to=YYYY-MM-DD ---
+            $from = request('expense_from');
+            $to   = request('expense_to');
+            if ($from || $to) {
+                $start = $from ? Carbon::parse($from)->startOfDay() : Carbon::minValue();
+                $end   = $to   ? Carbon::parse($to)->endOfDay()     : Carbon::maxValue();
+                $q->whereBetween('expenses.expense_date', [$start, $end]);
+            }
+
+            // --- Default to PAID when coming from dashboard unless status is explicitly set ---
+            $comingFromDashboard = request()->filled('expense');
+            if ($comingFromDashboard && !request()->filled('status')) {
+                $q->whereIn('expenses.status', ['paid','Paid',1,'1',true]);
+            }
+
+            // --- Optional explicit status quick filter (overrides the default) ---
+            if ($st = strtolower((string) request('status'))) {
+                if ($st === 'paid') {
+                    $q->whereIn('expenses.status', ['paid','Paid',1,'1',true]);
+                } elseif ($st === 'unpaid') {
+                    $q->whereIn('expenses.status', ['unpaid','Unpaid',0,'0',false]);
+                }
+            }
+
+            // --- Optional category / user filters ---
+            if ($cat = request('category')) {
+                $q->where('ec.name', $cat);
+            }
+            if ($uid = request('user_id')) {
+                $q->where('expenses.user_id', $uid);
+            }
+
+        return $q;
     }
 
     public function html(): HtmlBuilder
@@ -108,7 +174,22 @@ class ExpenseDataTable extends DataTable
         return $this->builder()
                     ->setTableId('expense-table')
                     ->columns($this->getColumns())
-                    ->minifiedAjax()
+                    ->ajax([
+                        'url'  => url()->current(),
+                        'type' => 'GET',
+                        'data' => 'function(d){
+                            const qs = new URLSearchParams(window.location.search);
+                            const hasPeriod = qs.get("expense") || qs.get("expense_from") || qs.get("expense_to");
+
+                            d.expense       = qs.get("expense")       || "";
+                            d.expense_from  = qs.get("expense_from")  || "";
+                            d.expense_to    = qs.get("expense_to")    || "";
+                            d.category      = qs.get("category")      || "";
+                            d.user_id       = qs.get("user_id")       || "";
+                            const s = qs.get("status");
+                            if (s !== null) d.status = s;  // only send if present in URL
+                        }',
+                    ])
                     ->pageLength(50)
                     ->parameters([
                         'dom' => '<"top d-flex flex-column mb-2"
@@ -156,6 +237,13 @@ class ExpenseDataTable extends DataTable
                             wrapper.find('.dataTables_paginate').addClass('mb-0');
                             wrapper.find('.dataTables_paginate .pagination').addClass('pagination-sm');
                             wrapper.find('.top .dataTables_paginate').addClass('ms-2');
+
+                            // ⬇️ Update the header total
+                            var json = api.ajax.json() || {};
+                            var txt  = (json.total_amount_text !== undefined)
+                                        ? json.total_amount_text
+                                        : (json.total_amount !== undefined ? json.total_amount : '—');
+                            $('#expense-total').text(txt);
                         }",
 
                         'categoryOptions' => ExpenseCategory::orderBy('name')->pluck('name')->values()->toArray(),
@@ -239,41 +327,41 @@ class ExpenseDataTable extends DataTable
                     ->orderBy(0)
                     ->selectStyleSingle()
                     ->buttons([
-                Button::make('colvis')->className('btn btn-primary py-1 px-2'),
+                        Button::make('colvis')->className('btn btn-primary py-1 px-2'),
 
-                Button::make('excel')
-                    ->className('btn btn-primary py-1 px-2')
-                    ->exportOptions([
-                        'columns'   => ':visible:not(.no-print)',
-                        'stripHtml' => true,
-                        'format'    => [
-                            // keep only the plain TH title
-                            'header' => 'function (data, idx) {
-                                var $h = $("<div>").html(data);
-                                $h.find(".dt-filter").remove(); // drop selects/inputs in TH
-                                return $.trim($h.text());
-                            }',
-                        ],
-                    ]),
+                        Button::make('excel')
+                            ->className('btn btn-primary py-1 px-2')
+                            ->exportOptions([
+                                'columns'   => ':visible:not(.no-print)',
+                                'stripHtml' => true,
+                                'format'    => [
+                                    // keep only the plain TH title
+                                    'header' => 'function (data, idx) {
+                                        var $h = $("<div>").html(data);
+                                        $h.find(".dt-filter").remove(); // drop selects/inputs in TH
+                                        return $.trim($h.text());
+                                    }',
+                                ],
+                            ]),
 
-                    Button::make('print')
-                        ->className('btn btn-primary py-1 px-2')
-                        ->exportOptions([
-                            'columns'   => ':visible:not(.no-print)',
-                            'stripHtml' => true,
-                            'format'    => [
-                                'header' => 'function (data, idx) {
-                                    var $h = $("<div>").html(data);
-                                    $h.find(".dt-filter").remove();
-                                    return $.trim($h.text());
-                                }',
-                            ],
-                        ])
-                        // hide any leftover header filters in the print window just in case
-                        ->customize('function (win) {
-                            $(win.document.head).append("<style>.dt-filter{display:none !important}</style>");
-                        }'),
-            ]);
+                            Button::make('print')
+                                ->className('btn btn-primary py-1 px-2')
+                                ->exportOptions([
+                                    'columns'   => ':visible:not(.no-print)',
+                                    'stripHtml' => true,
+                                    'format'    => [
+                                        'header' => 'function (data, idx) {
+                                            var $h = $("<div>").html(data);
+                                            $h.find(".dt-filter").remove();
+                                            return $.trim($h.text());
+                                        }',
+                                    ],
+                                ])
+                                // hide any leftover header filters in the print window just in case
+                                ->customize('function (win) {
+                                    $(win.document.head).append("<style>.dt-filter{display:none !important}</style>");
+                                }'),
+                        ]);
     }
 
     public function getColumns(): array

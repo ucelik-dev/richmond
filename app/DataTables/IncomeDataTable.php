@@ -4,6 +4,7 @@ namespace App\DataTables;
 
 use App\Models\Income;
 use App\Models\IncomeCategory;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\EloquentDataTable;
@@ -14,11 +15,10 @@ use Yajra\DataTables\Services\DataTable;
 
 class IncomeDataTable extends DataTable
 {
-
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
-        return (new EloquentDataTable($query))
-            // nice display columns
+        $dt = (new EloquentDataTable($query))
+            // display helpers
             ->addColumn('amount_text', fn($r) => currency_format($r->amount))
             ->addColumn('date_text',   fn($r) => $r->income_date ? \Carbon\Carbon::parse($r->income_date)->format('Y-m-d') : '')
             ->addColumn('status_badge', function ($r) {
@@ -33,12 +33,12 @@ class IncomeDataTable extends DataTable
                 $del  = route('admin.income.destroy', $r->id);
 
                 $html = '';
-                if(Auth::user()?->canResource('admin_incomes','edit')){
+                if (Auth::user()?->canResource('admin_incomes','edit')) {
                     $html .= '<a href="'.$edit.'" class="btn-sm btn-primary me-2 text-decoration-none">
                                 <i class="fa-solid fa-pen-to-square fa-lg"></i>
                               </a>';
                 }
-                if(Auth::user()?->canResource('admin_incomes','delete')){
+                if (Auth::user()?->canResource('admin_incomes','delete')) {
                     $html .= '<a href="'.$del.'" class="text-red delete-item text-decoration-none">
                                 <i class="fa-solid fa-trash-can fa-lg"></i>
                               </a>';
@@ -46,7 +46,7 @@ class IncomeDataTable extends DataTable
                 return $html ?: '-';
             })
 
-            // filters mapped to real DB fields
+            // filters mapped to DB fields
             ->filterColumn('category_name', function ($q, $kw) {
                 $kw = trim($kw, '^$ ');
                 if ($kw !== '') {
@@ -60,7 +60,6 @@ class IncomeDataTable extends DataTable
                 if (in_array($raw, ['unpaid','0','no','false'], true)) $q->where('incomes.status', 'unpaid');
             })
             ->filterColumn('amount_text', function ($q, $kw) {
-                // search by numeric amount regardless of currency formatting
                 $n = preg_replace('/[^\d.]/', '', (string)$kw);
                 if ($n !== '') $q->where('incomes.amount', 'like', "%{$n}%");
             })
@@ -73,17 +72,68 @@ class IncomeDataTable extends DataTable
 
             ->rawColumns(['status_badge','action'])
             ->setRowId('id');
+
+        /** ------- HEADER TOTAL (defaults to Paid) ------- */
+        $sumQ = $query
+            ->cloneWithout(['columns','orders','limit','offset'])
+            ->cloneWithoutBindings(['select','order']);
+
+        $sum = (clone $sumQ)->sum('incomes.amount');
+
+        return $dt->with([
+            'total_amount'      => $sum,
+            'total_amount_text' => currency_format($sum),
+        ]);
     }
 
     public function query(Income $model): QueryBuilder
     {
-        return $model->newQuery()
+        $q = $model->newQuery()
             ->select([
-                'incomes.id','incomes.income_category_id','incomes.amount','incomes.income_date',
-                'incomes.status','incomes.note',
+                'incomes.id',
+                'incomes.income_category_id',
+                'incomes.amount',
+                'incomes.income_date',
+                'incomes.status',
+                'incomes.note',
                 'income_categories.name as category_name',
             ])
             ->leftJoin('income_categories','income_categories.id','=','incomes.income_category_id');
+
+            // Optional period from query string: ?income=today|week|month|year
+            if ($period = request('income')) {
+                $now = \Carbon\Carbon::now();
+                [$from, $to] = match ($period) {
+                    'today' => [$now->copy()->startOfDay(),   $now->copy()->endOfDay()],
+                    'week'  => [$now->copy()->startOfWeek(),  $now->copy()->endOfWeek()],
+                    'month' => [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()],
+                    'year'  => [$now->copy()->startOfYear(),  $now->copy()->endOfYear()],
+                    default => [null, null],
+                };
+                if ($from && $to) {
+                    $q->whereBetween('incomes.income_date', [$from, $to]);
+                }
+            }
+
+            // Optional explicit date range
+            $from = request('income_from');
+            $to   = request('income_to');
+            if ($from || $to) {
+                $start = $from ? \Carbon\Carbon::parse($from)->startOfDay() : \Carbon\Carbon::minValue();
+                $end   = $to   ? \Carbon\Carbon::parse($to)->endOfDay()     : \Carbon\Carbon::maxValue();
+                $q->whereBetween('incomes.income_date', [$start, $end]);
+            }
+
+            // ✅ Only filter by status if explicitly provided (paid|unpaid)
+            if (request()->filled('status')) {
+                $st = strtolower((string) request('status'));
+                if (in_array($st, ['paid','unpaid'], true)) {
+                    $q->where('incomes.status', $st);
+                }
+            }
+
+            return $q;
+        
     }
 
     public function html(): HtmlBuilder
@@ -91,8 +141,19 @@ class IncomeDataTable extends DataTable
         return $this->builder()
             ->setTableId('income-table')
             ->columns($this->getColumns())
-            ->minifiedAjax()
-            ->orderBy(3, 'desc') // by date_text
+            ->ajax([
+                'url'  => url()->current(),
+                'type' => 'GET',
+                'data' => 'function(d){
+                    const qs = new URLSearchParams(window.location.search);
+                    d.income       = qs.get("income")       || "";    // today|week|month|year
+                    d.income_from  = qs.get("income_from") || "";
+                    d.income_to    = qs.get("income_to")   || "";
+                    const s = qs.get("status");
+                    if (s !== null) d.status = s;  // only send if present in URL
+                }',
+            ])
+            ->orderBy(3, 'desc') // date_text
             ->pageLength(50)
             ->parameters([
                 'dom' => '<"top d-flex flex-column mb-2"
@@ -129,7 +190,18 @@ class IncomeDataTable extends DataTable
                     ],
                 ],
 
-                // header selects
+                'drawCallback' => "function () {
+                    var api  = this.api();
+                    var json = api.ajax.json() || {};
+                    var txt  = (json.total_amount_text !== undefined)
+                                 ? json.total_amount_text
+                                 : (json.total_amount !== undefined ? json.total_amount : '—');
+                    // If you have <span id=\"income-total\"> in your Blade:
+                    if (document.getElementById('income-total')) {
+                        document.getElementById('income-total').textContent = txt;
+                    }
+                }",
+
                 'categoryOptions' => IncomeCategory::orderBy('name')->pluck('name')->values()->toArray(),
                 'statusOptions'   => ['Paid','Unpaid'],
 
@@ -147,9 +219,8 @@ class IncomeDataTable extends DataTable
                       }
 
                       var $wrap = $(api.table().container());
-                      $wrap
-                        .off('.dtHdrStop')
-                        .on('click.dtHdrStop mousedown.dtHdrStop keydown.dtHdrStop', 'thead .dt-filter, thead .dt-filter *', function(e){ e.stopPropagation(); });
+                      $wrap.off('.dtHdrStop')
+                           .on('click.dtHdrStop mousedown.dtHdrStop keydown.dtHdrStop', 'thead .dt-filter, thead .dt-filter *', function(e){ e.stopPropagation(); });
 
                       api.columns().every(function(){
                         var column = this;
@@ -174,13 +245,11 @@ class IncomeDataTable extends DataTable
                                    .html(buildOptions(statusOptions));
                           $head.append($s);
                           $s.on('change', function(){
-                            var v = this.value;
-                            column.search(v, false, true).draw();
+                            column.search(this.value || '', false, true).draw();
                           });
                           return;
                         }
 
-                        // default text input
                         if (['action','id'].indexOf(dataSrc) !== -1) return;
 
                         var $inp = $('<input/>', {'class':'form-control form-control-sm mt-2 dt-filter', type:'text'});
@@ -192,39 +261,35 @@ class IncomeDataTable extends DataTable
             ])
             ->buttons([
                 Button::make('colvis')->className('btn btn-primary py-1 px-2'),
-
                 Button::make('excel')
                     ->className('btn btn-primary py-1 px-2')
                     ->exportOptions([
                         'columns'   => ':visible:not(.no-print)',
                         'stripHtml' => true,
                         'format'    => [
-                            // keep only the plain TH title
                             'header' => 'function (data, idx) {
                                 var $h = $("<div>").html(data);
-                                $h.find(".dt-filter").remove(); // drop selects/inputs in TH
+                                $h.find(".dt-filter").remove();
                                 return $.trim($h.text());
                             }',
                         ],
                     ]),
-
-                    Button::make('print')
-                        ->className('btn btn-primary py-1 px-2')
-                        ->exportOptions([
-                            'columns'   => ':visible:not(.no-print)',
-                            'stripHtml' => true,
-                            'format'    => [
-                                'header' => 'function (data, idx) {
-                                    var $h = $("<div>").html(data);
-                                    $h.find(".dt-filter").remove();
-                                    return $.trim($h.text());
-                                }',
-                            ],
-                        ])
-                        // hide any leftover header filters in the print window just in case
-                        ->customize('function (win) {
-                            $(win.document.head).append("<style>.dt-filter{display:none !important}</style>");
-                        }'),
+                Button::make('print')
+                    ->className('btn btn-primary py-1 px-2')
+                    ->exportOptions([
+                        'columns'   => ':visible:not(.no-print)',
+                        'stripHtml' => true,
+                        'format'    => [
+                            'header' => 'function (data, idx) {
+                                var $h = $("<div>").html(data);
+                                $h.find(".dt-filter").remove();
+                                return $.trim($h.text());
+                            }',
+                        ],
+                    ])
+                    ->customize('function (win) {
+                        $(win.document.head).append("<style>.dt-filter{display:none !important}</style>");
+                    }'),
             ]);
     }
 
@@ -245,5 +310,4 @@ class IncomeDataTable extends DataTable
     {
         return 'Income_' . date('YmdHis');
     }
-
 }

@@ -138,26 +138,26 @@
                                 <div class="row align-items-center">
                                     <div class="col">
                                         <div class="font-weight-medium d-flex mb-2">
-                                            <div class="fw-bold">Student Payments</div>
+                                            <div class="fw-bold">Student Payments <span style="font-size: 10px">(Paid)</span></div>
                                         </div>
-                                        <div class="d-flex">
-                                            <div class="text-secondary">Today</div>
+                                        <div class="d-flex position-relative">
+                                            <div class="text-secondary"><a class="stretched-link text-secondary" href="{{ route('admin.payment.index', ['paid' => 'today', 'status' => 'paid']) }}">Today</a></div>
                                             <div class="text-secondary ms-auto">{{ currency_format($installmentsPaidToday) }}</div>
                                         </div>
-                                        <div class="d-flex">
-                                            <div class="text-secondary">This Week</div>
+                                        <div class="d-flex position-relative">
+                                            <div class="text-secondary"><a class="stretched-link text-secondary" href="{{ route('admin.payment.index', ['paid' => 'week', 'status' => 'paid']) }}">This Week</a></div>
                                             <div class="text-secondary ms-auto">{{ currency_format($installmentsPaidThisWeek) }}</div>
                                         </div>
-                                        <div class="d-flex">
-                                            <div class="text-secondary">This Month</div>
+                                        <div class="d-flex position-relative">
+                                            <div class="text-secondary"><a class="stretched-link text-secondary" href="{{ route('admin.payment.index', ['paid' => 'month', 'status' => 'paid']) }}">This Month</a></div>
                                             <div class="text-secondary ms-auto">{{ currency_format($installmentsPaidThisMonth) }}</div>
                                         </div>
-                                        <div class="d-flex">
-                                            <div class="text-secondary">This Year</div>
+                                        <div class="d-flex position-relative">
+                                            <div class="text-secondary"><a class="stretched-link text-secondary" href="{{ route('admin.payment.index', ['paid' => 'year', 'status' => 'paid']) }}">This Year</a></div>
                                             <div class="text-secondary ms-auto">{{ currency_format($installmentsPaidThisYear) }}</div>
                                         </div>
-                                        <div class="d-flex mt-2">
-                                            <div class="fw-bold">Total</div>
+                                        <div class="d-flex position-relative mt-2">
+                                            <div class="fw-bold"><a class="stretched-link text-dark" href="{{ route('admin.payment.index', ['status' => 'paid']) }}">Total</a></div>
                                             <div class="ms-auto fw-bold">{{ currency_format($installmentsPaidAll) }}</div>
                                         </div>
                                         
@@ -174,26 +174,26 @@
                                 <div class="row align-items-center">
                                     <div class="col">
                                         <div class="font-weight-medium d-flex mb-2">
-                                            <div class="fw-bold">Commissions</div>
+                                            <div class="fw-bold">Commissions <span style="font-size: 10px">(Paid)</span></div>
                                         </div>
-                                        <div class="d-flex">
-                                            <div class="text-secondary">Today</div>
+                                        <div class="d-flex position-relative">
+                                            <div class="text-secondary"><a class="stretched-link text-secondary" href="{{ route('admin.commission.index', ['commission' => 'today', 'status' => 'paid']) }}">Today</a></div>
                                             <div class="text-secondary ms-auto">{{ currency_format($commissionsPaidToday) }}</div>
                                         </div>
-                                        <div class="d-flex">
-                                            <div class="text-secondary">This Week</div>
+                                        <div class="d-flex position-relative">
+                                            <div class="text-secondary"><a class="stretched-link text-secondary" href="{{ route('admin.commission.index', ['commission' => 'week', 'status' => 'paid']) }}">This Week</a></div>
                                             <div class="text-secondary ms-auto">{{ currency_format($commissionsPaidThisWeek) }}</div>
                                         </div>
-                                        <div class="d-flex">
-                                            <div class="text-secondary">This Month</div>
+                                        <div class="d-flex position-relative">
+                                            <div class="text-secondary"><a class="stretched-link text-secondary" href="{{ route('admin.commission.index', ['commission' => 'month', 'status' => 'paid']) }}">This Month</a></div>
                                             <div class="text-secondary ms-auto">{{ currency_format($commissionsPaidThisMonth) }}</div>
                                         </div>
-                                        <div class="d-flex">
-                                            <div class="text-secondary">This Year</div>
+                                        <div class="d-flex position-relative">
+                                            <div class="text-secondary"><a class="stretched-link text-secondary" href="{{ route('admin.commission.index', ['commission' => 'year', 'status' => 'paid']) }}">This Year</a></div>
                                             <div class="text-secondary ms-auto">{{ currency_format($commissionsPaidThisYear) }}</div>
                                         </div>
-                                        <div class="d-flex mt-2">
-                                            <div class="fw-bold">Total</div>
+                                        <div class="d-flex position-relative mt-2">
+                                            <div class="fw-bold"><a class="stretched-link text-dark" href="{{ route('admin.commission.index', ['status' => 'paid']) }}">Total</a></div>
                                             <div class="ms-auto fw-bold">{{ currency_format($commissionsPaidAll) }}</div>
                                         </div>
                                     </div>
@@ -209,26 +209,26 @@
                                 <div class="row align-items-center">
                                     <div class="col">
                                         <div class="font-weight-medium d-flex mb-2">
-                                            <div class="fw-bold">Expenses</div>
+                                            <div class="fw-bold">Expenses <span style="font-size: 10px">(Paid)</span></div>
                                         </div>
-                                        <div class="d-flex">
-                                            <div class="text-secondary">Today</div>
+                                        <div class="d-flex position-relative">
+                                            <div class="text-secondary"><a class="stretched-link text-secondary" href="{{ route('admin.expense.index', ['expense' => 'today', 'status' => 'paid']) }}">Today</a></div>
                                             <div class="text-secondary ms-auto">{{ currency_format($expensesPaidToday) }}</div>
                                         </div>
-                                        <div class="d-flex">
-                                            <div class="text-secondary">This Week</div>
+                                        <div class="d-flex position-relative">
+                                            <div class="text-secondary"><a class="stretched-link text-secondary" href="{{ route('admin.expense.index', ['expense' => 'week', 'status' => 'paid']) }}">This Week</a></div>
                                             <div class="text-secondary ms-auto">{{ currency_format($expensesPaidThisWeek) }}</div>
                                         </div>
-                                        <div class="d-flex">
-                                            <div class="text-secondary">This Month</div>
+                                        <div class="d-flex position-relative">
+                                            <div class="text-secondary"><a class="stretched-link text-secondary" href="{{ route('admin.expense.index', ['expense' => 'month', 'status' => 'paid']) }}">This Month</a></div>
                                             <div class="text-secondary ms-auto">{{ currency_format($expensesPaidThisMonth) }}</div>
                                         </div>
-                                        <div class="d-flex">
-                                            <div class="text-secondary">This Year</div>
+                                        <div class="d-flex position-relative">
+                                            <div class="text-secondary"><a class="stretched-link text-secondary" href="{{ route('admin.expense.index', ['expense' => 'year', 'status' => 'paid']) }}">This Year</a></div>
                                             <div class="text-secondary ms-auto">{{ currency_format($expensesPaidThisYear) }}</div>
                                         </div>
-                                        <div class="d-flex mt-2">
-                                            <div class="fw-bold">Total</div>
+                                        <div class="d-flex position-relative mt-2">
+                                            <div class="fw-bold"><a class="stretched-link text-dark" href="{{ route('admin.expense.index', ['status' => 'paid']) }}">Total</a></div>
                                             <div class="ms-auto fw-bold">{{ currency_format($expensesPaidAll) }}</div>
                                         </div>
                                     </div>
@@ -244,26 +244,26 @@
                                 <div class="row align-items-center">
                                     <div class="col">
                                         <div class="font-weight-medium d-flex mb-2">
-                                            <div class="fw-bold">Incomes</div>
+                                            <div class="fw-bold">Incomes <span style="font-size: 10px">(Paid)</span></div>
                                         </div>
-                                        <div class="d-flex">
-                                            <div class="text-secondary">Today</div>
+                                        <div class="d-flex position-relative">
+                                            <div class="text-secondary"><a class="stretched-link text-secondary" href="{{ route('admin.income.index', ['income' => 'today', 'status' => 'paid']) }}">Today</a></div>
                                             <div class="text-secondary ms-auto">{{ currency_format($incomesPaidToday) }}</div>
                                         </div>
-                                        <div class="d-flex">
-                                            <div class="text-secondary">This Week</div>
+                                        <div class="d-flex position-relative">
+                                            <div class="text-secondary"><a class="stretched-link text-secondary" href="{{ route('admin.income.index', ['income' => 'week', 'status' => 'paid']) }}">This Week</a></div>
                                             <div class="text-secondary ms-auto">{{ currency_format($incomesPaidThisWeek) }}</div>
                                         </div>
-                                        <div class="d-flex">
-                                            <div class="text-secondary">This Month</div>
+                                        <div class="d-flex position-relative">
+                                            <div class="text-secondary"><a class="stretched-link text-secondary" href="{{ route('admin.income.index', ['income' => 'month', 'status' => 'paid']) }}">This Month</a></div>
                                             <div class="text-secondary ms-auto">{{ currency_format($incomesPaidThisMonth) }}</div>
                                         </div>
-                                        <div class="d-flex">
-                                            <div class="text-secondary">This Year</div>
+                                        <div class="d-flex position-relative">
+                                            <div class="text-secondary"><a class="stretched-link text-secondary" href="{{ route('admin.income.index', ['income' => 'year', 'status' => 'paid']) }}">This Year</a></div>
                                             <div class="text-secondary ms-auto">{{ currency_format($incomesPaidThisYear) }}</div>
                                         </div>
-                                        <div class="d-flex mt-2">
-                                            <div class="fw-bold">Total</div>
+                                        <div class="d-flex position-relative mt-2">
+                                            <div class="fw-bold"><a class="stretched-link text-dark" href="{{ route('admin.income.index', ['status' => 'paid']) }}">Total</a></div>
                                             <div class="ms-auto fw-bold">{{ currency_format($incomesPaidAll) }}</div>
                                         </div>
                                     </div>
