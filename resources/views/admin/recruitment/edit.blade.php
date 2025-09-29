@@ -145,8 +145,8 @@
                                 <div class="col-xl-12">
                                     <div class="add_course_basic_info_input">
                                         <div class="add_course_basic_info_input d-flex gap-2">
-                                            <button type="submit" name="action" value="save_exit" class="btn btn-dark px-2 py-1 px-md-3 py-md-2 mt-2">Update</button>
-                                            <button type="submit" name="action" value="save_stay" class="btn btn-secondary px-2 py-1 px-md-3 py-md-2 mt-2">Update & Stay</button>
+                                            <button type="submit" name="action" value="save_exit" class="btn btn-dark px-2 py-1 px-md-3 py-md-2 mt-4">Update</button>
+                                            <button type="submit" name="action" value="save_stay" class="btn btn-secondary px-2 py-1 px-md-3 py-md-2 mt-4">Update & Stay</button>
                                         </div>
                                     </div>
                                 </div>
@@ -172,7 +172,7 @@
                     <td class="text-nowrap align-middle py-1" style="width: 500px">
                         <div class="general_form_input mb-2 mt-1 d-flex align-items-center" style="min-width: 350px;max-width: 500px;">
                             <label class="label-required me-2" style="min-width: 120px;">Communication</label>
-                            <select name="call_logs[${callIndex}][communication_method]" class="form-control">
+                            <select name="call_logs[${callIndex}][communication_method]" class="form-control form-select" required>
                                 <option value="">Select</option>
                                 <option value="call">Call</option>
                                 <option value="message">Message</option>
@@ -180,7 +180,7 @@
                         </div>
                         <div class="general_form_input mb-1 d-flex align-items-center" style="min-width: 350px;max-width: 500px;">
                             <label class="label-required me-2" style="min-width: 120px;">Status</label>
-                            <select name="call_logs[${callIndex}][call_status_id]" class="form-control form-select">
+                            <select name="call_logs[${callIndex}][call_status_id]" class="form-control form-select" required>
                                 <option value="">Select</option>
                                 @foreach($recruitmentStatuses as $status)
                                     <option value="{{ $status->id }}">{{ $status->name }}</option>
