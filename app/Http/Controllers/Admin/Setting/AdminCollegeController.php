@@ -31,6 +31,8 @@ class AdminCollegeController extends Controller
             'url' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:255',
             'email' => 'nullable|string|lowercase|email|max:255',
+            'bank_account' => 'nullable|string|max:5000',
+            'invoice_data' => 'nullable|string|max:5000',
             'status' => 'required|in:0,1',
         ]);
         
@@ -47,6 +49,8 @@ class AdminCollegeController extends Controller
         $college->url = $request->url;
         $college->phone = $request->phone;
         $college->email = $request->email;
+        $college->bank_account = $request->bank_account;
+        $college->invoice_data = $request->invoice_data;
         $college->status = $request->status;
         $college->save();
 
@@ -74,6 +78,8 @@ class AdminCollegeController extends Controller
             'url' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:255',
             'email' => 'nullable|string|lowercase|email|max:255',
+            'bank_account' => 'nullable|string|max:5000',
+            'invoice_data' => 'nullable|string|max:5000',
             'status' => 'required|in:0,1',
         ]);
 
@@ -91,6 +97,8 @@ class AdminCollegeController extends Controller
             'url' => $request->url,
             'phone' => $request->phone,
             'email' => $request->email,
+            'bank_account' => $request->bank_account,
+            'invoice_data' => $request->invoice_data,
             'status' => $request->status
         ]);
 

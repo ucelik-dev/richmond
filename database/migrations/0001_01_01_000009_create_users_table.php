@@ -32,6 +32,8 @@ return new class extends Migration
             $table->string('post_code')->nullable();
             $table->string('address')->nullable();
             $table->string('company')->nullable();
+            $table->text('bank_account')->nullable();
+            $table->text('invoice_data')->nullable();
             $table->text('bio')->nullable();
 
             $table->string('education_status')->nullable();

@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('phone')->nullable();    
             $table->string('email')->nullable();
             $table->boolean('status')->default(true);
+            $table->text('bank_account')->nullable();
+            $table->text('invoice_data')->nullable();
             $table->timestamps();
         });
     }

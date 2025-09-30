@@ -39,6 +39,7 @@ use App\Http\Controllers\Admin\Setting\AdminUserRoleController;
 use App\Http\Controllers\Admin\Setting\AdminUserStatusController;
 use App\Http\Controllers\Frontend\Agent\AgentDashboardController;
 use App\Http\Controllers\Frontend\Agent\AgentDocumentController;
+use App\Http\Controllers\Frontend\Agent\AgentFinanceController;
 use App\Http\Controllers\Frontend\Agent\AgentProfileController;
 use App\Http\Controllers\Frontend\Agent\AgentRegistrationController;
 use App\Http\Controllers\Frontend\FrontendController;
@@ -160,6 +161,9 @@ Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'agent', 'as' =>
     });
 
     Route::get('/document', [AgentDocumentController::class, 'index'])->name('document')->middleware('permission:agent_documents,view');
+
+    Route::get('/finance', [AgentFinanceController::class, 'index'])->name('finance'); 
+    Route::put('/finance/update', [AgentFinanceController::class, 'update'])->name('finance.update');
 
     Route::get('/registration', [AgentRegistrationController::class, 'index'])->name('registration.index')->middleware('permission:agent_registrations,view');
 

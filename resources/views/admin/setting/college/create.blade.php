@@ -77,6 +77,20 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="col-xl-6">
+                                <div class="general_form_input">
+                                    <label for="#">Bank Account</label>
+                                    <textarea rows="8" name="bank_account" class="form-control summernote">{{ old('bank_account') }}</textarea>
+                                    <x-input-error :messages="$errors->get('bank_account')" class="mt-2 text-danger small" />
+                                </div>
+                            </div>
+                            <div class="col-xl-6">
+                                <div class="general_form_input">
+                                    <label for="#">Invoice Data</label>
+                                    <textarea rows="8" name="invoice_data" class="form-control summernote">{{ old('invoice_data') }}</textarea>
+                                    <x-input-error :messages="$errors->get('invoice_data')" class="mt-2 text-danger small" />
+                                </div>
+                            </div>
                         </div>
 
                         <button type="submit" class="btn btn-dark px-2 py-1 px-md-3 py-md-2 mt-2">Create</button>
@@ -88,3 +102,16 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+
+<script>
+$(function () {
+  $('.summernote').summernote({
+    height: 250,
+    placeholder: 'Type here…'
+  });
+});
+</script>
+
+@endpush

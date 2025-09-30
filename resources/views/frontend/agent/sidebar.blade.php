@@ -67,6 +67,17 @@
                 </li>
             @endif
 
+            @if(auth()->user()?->canResource('agent_finance','view'))
+                <li>
+                    <a href="{{ route('agent.finance') }}" class="{{ setFrontendSidebarActive(['agent.finance']) }}">
+                        <div class="img">
+                            <i class="fa-solid fa-credit-card"></i>
+                        </div>
+                        Finance
+                    </a>
+                </li>
+            @endif
+
             {{-- <li>
                 <a href="dashboard_support.html">
                     <div class="img">
