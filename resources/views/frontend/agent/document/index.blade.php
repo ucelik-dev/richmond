@@ -7,68 +7,60 @@
         <div class="container-fluid px-4">
             <div class="row">
 
-                @include('frontend.student.sidebar')
+                @include('frontend.agent.sidebar')
 
                 <div class="col-xl-10 col-md-8 wow fadeInRight" style="visibility: visible; animation-name: fadeInRight;">
 
                     <div class="wsus__dashboard_content">
                         <div class="wsus__dashboard_content_top d-flex flex-wrap justify-content-between">
                             <div class="wsus__dashboard_heading">
-                                <h5>Update Your Documents</h5>
-                                <p>Add or update your official documents.</p>
+                                <h5>Documents</h5>
                             </div>
                         </div>
 
 
-                        <form action="{{ route('student.document.update') }}" method="POST" enctype="multipart/form-data" class="wsus__dashboard_profile_update">
-                        @csrf
-                            <div class="row">
-                                <div class="col-xl-12 table-responsive">
-                                    <table class="table table-bordered" id="socialAccountsTable">
-                                        <thead>
-                                            <tr>
-                                                <th class="text-nowrap">Document Category</th>
-                                                <th class="text-nowrap">File</th>
-                                                <th class="text-nowrap">Upload</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
+                            <div class="wsus__dash_course_table">
+                                <div class="row">
+                                    <div class="col-12 p-4">
+                                        <div class="table-responsive p-1 border rounded">
+                                            <table class="table table-bordered" id="documentsTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="text-nowrap">Category</th>
+                                                        <th class="text-nowrap">File</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
 
-                                            @foreach ($documentCategories as $index => $documentCategory)
-                                                @php
-                                                    $document = $student->documents->firstWhere('category_id', $documentCategory->id);
-                                                @endphp
-                                                <tr>
-                                                    <td class="align-middle">
-                                                        <input type="hidden" name="documents[{{ $index }}][category_id]" value="{{ $documentCategory->id }}">
-                                                        <input type="text" class="form-control" value="{{ $documentCategory->name }}" disabled>
-                                                    </td>
-                                                    <td>
-                                                        @if($document)
-                                                            <a href="{{ asset($document->path) }}" target="_blank">{{ basename($document->path) }}</a>
-                                                        @else
-                                                            <span class="text-muted">No file uploaded</span>
-                                                        @endif
-                                                    </td>
-                                                    <td>
-                                                        <input type="file" name="documents[{{ $index }}][file]" class="form-control" />
-                                                    </td>
-                                                </tr>
-                                            @endforeach
+                                                    @forelse ($agent->documents as $doc)
+                                                        <tr>
+                                                            <td class="align-middle">
+                                                                {{ $doc->category?->name ?? '—' }}
+                                                            </td>
+                                                            <td>
+                                                                @if(!empty($doc->path))
+                                                                    <a href="{{ asset($doc->path) }}" target="_blank">
+                                                                        View File
+                                                                    </a>
+                                                                @else
+                                                                    <span class="text-muted">No file uploaded</span>
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @empty
+                                                        <tr>
+                                                            <td colspan="2" class="text-muted">No documents found.</td>
+                                                        </tr>
+                                                    @endforelse
 
-                                        </tbody>
-                                    </table>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                       
+                                    </div>
                                     
                                 </div>
-
-                                 <div class="col-xl-12">
-                                    <div class="wsus__dashboard_profile_update_btn">
-                                        <button type="submit" class="common_btn">Update Documents</button>
-                                    </div>
-                                </div>
-                                
                             </div>
-                        </form>
                             
                     
                     </div>

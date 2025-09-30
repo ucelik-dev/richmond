@@ -38,6 +38,7 @@ use App\Http\Controllers\Admin\Setting\AdminUserPermissionController;
 use App\Http\Controllers\Admin\Setting\AdminUserRoleController;
 use App\Http\Controllers\Admin\Setting\AdminUserStatusController;
 use App\Http\Controllers\Frontend\Agent\AgentDashboardController;
+use App\Http\Controllers\Frontend\Agent\AgentDocumentController;
 use App\Http\Controllers\Frontend\Agent\AgentProfileController;
 use App\Http\Controllers\Frontend\Agent\AgentRegistrationController;
 use App\Http\Controllers\Frontend\FrontendController;
@@ -157,6 +158,8 @@ Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'agent', 'as' =>
         Route::post('/profile/update-social', [AgentProfileController::class, 'updateSocial'])->name('profile.update-social');
         Route::post('/profile/update-avatar', [AgentProfileController::class, 'updateAvatar'])->name('profile.update-avatar');
     });
+
+    Route::get('/document', [AgentDocumentController::class, 'index'])->name('document')->middleware('permission:agent_documents,view');
 
     Route::get('/registration', [AgentRegistrationController::class, 'index'])->name('registration.index')->middleware('permission:agent_registrations,view');
 

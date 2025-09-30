@@ -35,7 +35,7 @@
                 </a>
             </li>
 
-            @can('view_student_profile')
+            @if(auth()->user()?->canResource('student_profile','view'))
                 <li>
                     <a href="{{ route('student.profile') }}" class="{{ setFrontendSidebarActive(['student.profile']) }}">
                         <div class="img">
@@ -44,9 +44,9 @@
                         Profile
                     </a>
                 </li>
-            @endcan
+            @endif
 
-            @can('view_student_documents')
+            @if(auth()->user()?->canResource('student_documents','view'))
                 <li>
                     <a href="{{ route('student.document') }}" class="{{ setFrontendSidebarActive(['student.document']) }}">
                         <div class="img">
@@ -55,9 +55,9 @@
                         Documents
                     </a>
                 </li>
-            @endcan
+            @endif
             
-            @can('view_student_courses')
+            @if(auth()->user()?->canResource('student_courses','view'))
                 <li>
                     <a href="{{ route('student.course') }}" class="{{ setFrontendSidebarActive(['student.course']) }}">
                         <div class="img">
@@ -66,9 +66,9 @@
                         Courses
                     </a>
                 </li>
-            @endcan
+            @endif
 
-            @can('view_student_assignments')
+           @if(auth()->user()?->canResource('student_assignments','view'))
                 <li>
                     <a href="{{ route('student.assignment.index') }}" class="{{ setFrontendSidebarActive(['student.assignment.index']) }}">
                         <div class="img">
@@ -77,9 +77,9 @@
                         Assignments
                     </a>
                 </li>
-            @endcan
+            @endif
 
-            @can('view_student_payments')
+            @if(auth()->user()?->canResource('student_payments','view'))
                 <li>
                     <a href="{{ route('student.payment.index') }}" class="{{ setFrontendSidebarActive(['student.payment.index']) }}">
                         <div class="img">
@@ -88,9 +88,9 @@
                         Payments
                     </a>
                 </li>
-            @endcan
+            @endif
 
-            @can('view_student_emails')
+            @if(auth()->user()?->canResource('student_emails','view'))
                 <li>
                     <a href="{{ route('student.email-log.index') }}" class="{{ setFrontendSidebarActive(['student.email-log.*']) }}">
                         <div class="img">
@@ -99,7 +99,7 @@
                         Emails
                     </a>
                 </li>
-            @endcan
+            @endif
             
             {{-- <li>
                 <a href="dashboard_support.html">

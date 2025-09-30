@@ -34,7 +34,7 @@
                 </a>
             </li>
 
-            @can('view_agent_profile')
+            @if(auth()->user()?->canResource('agent_profile','view'))
                 <li>
                     <a href="{{ route('agent.profile') }}" class="{{ setFrontendSidebarActive(['agent.profile']) }}">
                         <div class="img">
@@ -43,9 +43,9 @@
                         Profile
                     </a>
                 </li>
-            @endcan
+            @endif
 
-            @can('view_agent_registrations')
+            @if(auth()->user()?->canResource('agent_registrations','view'))
                 <li>
                     <a href="{{ route('agent.registration.index') }}" class="{{ setFrontendSidebarActive(['agent.registration.index']) }}">
                         <div class="img">
@@ -54,7 +54,18 @@
                         Registrations
                     </a>
                 </li>
-            @endcan
+            @endif
+
+            @if(auth()->user()?->canResource('agent_documents','view'))
+                <li>
+                    <a href="{{ route('agent.document') }}" class="{{ setFrontendSidebarActive(['agent.document']) }}">
+                        <div class="img">
+                            <i class="fa-solid fa-file-contract"></i>
+                        </div>
+                        Documents
+                    </a>
+                </li>
+            @endif
 
             {{-- <li>
                 <a href="dashboard_support.html">

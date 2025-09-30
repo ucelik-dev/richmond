@@ -34,7 +34,7 @@
                     </a>
                 </li>
 
-            @can('view_instructor_profile')
+            @if(auth()->user()?->canResource('instructor_profile','view'))
                 <li>
                     <a href="{{ route('instructor.profile') }}" class="{{ setFrontendSidebarActive(['instructor.profile']) }}">
                         <div class="img">
@@ -43,9 +43,9 @@
                         Profile
                     </a>
                 </li>
-            @endcan
+            @endif
 
-            @can('view_instructor_groups')
+            @if(auth()->user()?->canResource('instructor_groups','view'))
                 <li>
                     <a href="{{ route('instructor.groups.index') }}" class="{{ setFrontendSidebarActive(['instructor.groups.index','instructor.groups.*']) }}">
                         <div class="img">
@@ -54,9 +54,9 @@
                         Groups
                     </a>
                 </li>
-            @endcan
+            @endif
 
-            @can('view_instructor_students')
+            @if(auth()->user()?->canResource('instructor_students','view'))
                 <li>
                     <a href="{{ route('instructor.students.index') }}" class="{{ setFrontendSidebarActive(['instructor.students.index']) }}">
                         <div class="img">
@@ -65,9 +65,9 @@
                         Students
                     </a>
                 </li>
-            @endcan
+            @endif
 
-            @can('view_instructor_assignments')
+            @if(auth()->user()?->canResource('instructor_assignments','view'))
                 <li>
                     <a href="{{ route('instructor.assignment.index') }}" class="{{ setFrontendSidebarActive(['instructor.assignment.index','instructor.assignment.*']) }}">
                         <div class="img">
