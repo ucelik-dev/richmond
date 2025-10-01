@@ -4,6 +4,7 @@ namespace App\DataTables;
 
 use App\Models\User;
 use App\Models\UserStatus;
+use DB;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\EloquentDataTable;
@@ -60,6 +61,12 @@ class InstructorStudentsDataTable extends DataTable
                 if ($kw !== '') {
                     $q->where('countries.name', 'like', "%{$kw}%");
                 }
+            })
+
+            ->editColumn('registered_text', fn($r) => e($r->registered_text ?? ''))
+
+            ->filterColumn('registered_text', function ($q, $kw) {
+                $q->whereRaw("DATE_FORMAT(users.created_at, '%Y-%m-%d') LIKE ?", ["%".trim($kw)."%"]);
             })
 
             // AWARDING BODY block (or payment gate)
@@ -154,6 +161,7 @@ class InstructorStudentsDataTable extends DataTable
                 'user_statuses.name  as user_status_name',   
                 'user_statuses.color as user_status_color',  
                 'countries.name as country_name', 
+                DB::raw("DATE_FORMAT(users.created_at, '%Y-%m-%d') AS registered_text"),
             ])
             ->with([
                 'country:id,name',
@@ -335,7 +343,7 @@ class InstructorStudentsDataTable extends DataTable
             Column::computed('email')->title('Email')->orderable(false)->searchable(true)->visible(false),
             Column::computed('phone')->title('Phone')->orderable(false)->searchable(true)->visible(false),
             Column::computed('country')->title('Country')->orderable(false)->searchable(true),
-
+            Column::make('registered_text')->title('Registration')->name('users.created_at')->orderable(false)->searchable(true)->visible(false),
             Column::computed('courses')->title('Course')->orderable(false)->searchable(true),
             Column::computed('groups')->title('Group')->orderable(false)->searchable(true),
             Column::computed('batches')->title('Batch')->orderable(false)->searchable(true),
