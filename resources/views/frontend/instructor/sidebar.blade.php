@@ -76,7 +76,18 @@
                         Assignments
                     </a>
                 </li>
-            @endcan
+            @endif
+
+            @if(auth()->user()?->canResource('instructor_finance','view'))
+                <li>
+                    <a href="{{ route('instructor.finance') }}" class="{{ setFrontendSidebarActive(['instructor.finance']) }}">
+                        <div class="img">
+                            <i class="fa-solid fa-credit-card"></i>
+                        </div>
+                        Finance
+                    </a>
+                </li>
+            @endif
 
            {{--  <li>
                 <a href="dashboard_support.html">

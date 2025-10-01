@@ -1,20 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\Frontend\Agent;
+namespace App\Http\Controllers\Frontend\Instructor;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class AgentFinanceController extends Controller
+class InstructorFinanceController extends Controller
 {
     public function index()
     {
-        $agent = Auth::user()->load(['agentProfile', 'college']);
-        return view('frontend.agent.finance.index', [
-            'agent'   => $agent,
-            'college' => $agent->college,
-        ]);
+        $instructor = User::findOrFail(Auth::user()->id);
+        return view('frontend.instructor.finance.index', compact('instructor'));
     }
 
     public function update(Request $request)
@@ -50,4 +48,5 @@ class AgentFinanceController extends Controller
         notyf()->success('Finance details updated successfully!');
         return redirect()->back();
     }
+
 }

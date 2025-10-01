@@ -46,6 +46,7 @@ use App\Http\Controllers\Frontend\FrontendController;
 use App\Http\Controllers\Frontend\Instructor\InstructorAssignmentController;
 use App\Http\Controllers\Frontend\Student\StudentDashboardController;
 use App\Http\Controllers\Frontend\Instructor\InstructorDashboardController;
+use App\Http\Controllers\Frontend\Instructor\InstructorFinanceController;
 use App\Http\Controllers\Frontend\Instructor\InstructorProfileController;
 use App\Http\Controllers\Frontend\Instructor\InstructorGroupController;
 use App\Http\Controllers\Frontend\Instructor\InstructorGroupShareController;
@@ -139,7 +140,8 @@ Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'instructor', 'a
     Route::put('assignment/{module}/update', [InstructorAssignmentController::class, 'update'])->name('assignment.update')->middleware('permission:instructor_assignments,edit');
     Route::delete('assignment/evaluation/{submission}', [InstructorAssignmentController::class, 'destroyEvaluation'])->name('assignment.evaluation.destroy')->middleware('permission:instructor_assignments,delete');
 
-
+    Route::get('/finance', [InstructorFinanceController::class, 'index'])->name('finance'); 
+    Route::put('/finance/update', [InstructorFinanceController::class, 'update'])->name('finance.update');
 
 });
 
