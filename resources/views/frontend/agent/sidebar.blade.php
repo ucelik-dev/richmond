@@ -19,7 +19,7 @@
                     </div>
                 </div>
         
-                <h4 class="mt-2">{{ auth()->user()->name }}</h4>
+                <h4 class="mt-2">{{ auth()->user()->company ?? auth()->user()->name }}</h4>
                 <p>{{ auth()->user()->mainRole->name }}</p>
             </div>
         </form>
@@ -63,6 +63,17 @@
                             <i class="fa-solid fa-file-contract"></i>
                         </div>
                         Documents
+                    </a>
+                </li>
+            @endif 
+
+            @if(auth()->user()?->canResource('agent_discount_coupons','view'))
+                <li>
+                    <a href="{{ route('agent.discount-coupon.index') }}" class="{{ setFrontendSidebarActive(['agent.discount-coupon']) }}">
+                        <div class="img">
+                            <i class="fa-solid fa-ticket"></i>
+                        </div>
+                        Coupons
                     </a>
                 </li>
             @endif

@@ -194,6 +194,20 @@
                     </li>
                 @endif
 
+                @if(auth()->user()?->canResource('admin_discount_coupons','view'))
+                    <li class="nav-item dropdown">
+                        <a class="nav-link {{ setSidebarActive(['admin.discount-coupon.*']) }}" href="{{ route('admin.discount-coupon.index') }}">
+                            <span
+                                class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="fa-solid fa-ticket"></i>
+                            </span>
+                            <span class="nav-link-title">
+                                Discount Coupons
+                            </span>
+                        </a>
+                    </li>
+                @endif
+
                 @if(auth()->user()?->canResource('admin_settings','view'))
                     <li class="nav-item dropdown">
                         <a class="nav-link {{ setSidebarActive(['admin.setting.*','admin.setting-*']) }}" href="{{ route('admin.setting.index') }}">

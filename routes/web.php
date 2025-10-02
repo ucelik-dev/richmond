@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminBulkEmailController;
 use App\Http\Controllers\Admin\AdminCommissionController;
 use App\Http\Controllers\Admin\AdminCourseController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminDiscountCouponController;
 use App\Http\Controllers\Admin\AdminEmailLogController;
 use App\Http\Controllers\Admin\AdminExpenseController;
 use App\Http\Controllers\Admin\AdminGraduateController;
@@ -38,6 +39,7 @@ use App\Http\Controllers\Admin\Setting\AdminUserPermissionController;
 use App\Http\Controllers\Admin\Setting\AdminUserRoleController;
 use App\Http\Controllers\Admin\Setting\AdminUserStatusController;
 use App\Http\Controllers\Frontend\Agent\AgentDashboardController;
+use App\Http\Controllers\Frontend\Agent\AgentDiscountCouponController;
 use App\Http\Controllers\Frontend\Agent\AgentDocumentController;
 use App\Http\Controllers\Frontend\Agent\AgentFinanceController;
 use App\Http\Controllers\Frontend\Agent\AgentProfileController;
@@ -140,8 +142,8 @@ Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'instructor', 'a
     Route::put('assignment/{module}/update', [InstructorAssignmentController::class, 'update'])->name('assignment.update')->middleware('permission:instructor_assignments,edit');
     Route::delete('assignment/evaluation/{submission}', [InstructorAssignmentController::class, 'destroyEvaluation'])->name('assignment.evaluation.destroy')->middleware('permission:instructor_assignments,delete');
 
-    Route::get('/finance', [InstructorFinanceController::class, 'index'])->name('finance'); 
-    Route::put('/finance/update', [InstructorFinanceController::class, 'update'])->name('finance.update');
+    Route::get('/finance', [InstructorFinanceController::class, 'index'])->name('finance')->middleware('permission:instructor_finance,view');
+    Route::put('/finance/update', [InstructorFinanceController::class, 'update'])->name('finance.update')->middleware('permission:instructor_finance,edit');
 
 });
 
@@ -164,10 +166,11 @@ Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'agent', 'as' =>
 
     Route::get('/document', [AgentDocumentController::class, 'index'])->name('document')->middleware('permission:agent_documents,view');
 
-    Route::get('/finance', [AgentFinanceController::class, 'index'])->name('finance'); 
-    Route::put('/finance/update', [AgentFinanceController::class, 'update'])->name('finance.update');
+    Route::get('/finance', [AgentFinanceController::class, 'index'])->name('finance')->middleware('permission:agent_finance,view');
+    Route::put('/finance/update', [AgentFinanceController::class, 'update'])->name('finance.update')->middleware('permission:agent_finance,edit');
 
     Route::get('/registration', [AgentRegistrationController::class, 'index'])->name('registration.index')->middleware('permission:agent_registrations,view');
+    Route::get('/discount-coupon', [AgentDiscountCouponController::class, 'index'])->name('discount-coupon.index')->middleware('permission:agent_discount_coupons,view');
 
 });
 
@@ -182,60 +185,34 @@ Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'admin', 'as' =>
     });
 
     // Profile
-    Route::get('/profile', [AdminProfileController::class, 'edit'])
-        ->name('profile.edit')->middleware('permission:admin_profile,view');
-    Route::put('/profile', [AdminProfileController::class, 'update'])
-        ->name('profile.update')->middleware('permission:admin_profile,edit');
+    Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit')->middleware('permission:admin_profile,view');
+    Route::put('/profile', [AdminProfileController::class, 'update'])->name('profile.update')->middleware('permission:admin_profile,edit');
 
     /* User Routes */
     Route::resource('user', AdminUserController::class)
         ->middleware('permission:admin_users,view');
     // user permission editor
-    Route::get('user/{user}/permission', [AdminUserController::class, 'editPermissions'])
-        ->name('user.permission.edit')->middleware('permission:admin_users,edit');
-    Route::put('user/{user}/permission', [AdminUserController::class, 'updatePermissions'])
-        ->name('user.permission.update')->middleware('permission:admin_users,edit');
+    Route::get('user/{user}/permission', [AdminUserController::class, 'editPermissions'])->name('user.permission.edit')->middleware('permission:admin_users,edit');
+    Route::put('user/{user}/permission', [AdminUserController::class, 'updatePermissions'])->name('user.permission.update')->middleware('permission:admin_users,edit');
 
-    /* Student Routes */
     Route::resource('student', AdminStudentController::class)->middleware('permission:admin_students,view');
-
-    /* Instructor Routes */
     Route::resource('instructor', AdminInstructorController::class)->middleware('permission:admin_instructors,view');
-
-    /* Agent Routes */
     Route::resource('agent', AdminAgentController::class)->middleware('permission:admin_agents,view');
-
-    /* Manager Routes */
     Route::resource('manager', AdminManagerController::class)->middleware('permission:admin_managers,view');
-
-    /* Course Routes */
     Route::resource('course', AdminCourseController::class)->middleware('permission:admin_courses,view');
-
-    /* Module Routes */
     Route::resource('module', AdminModuleController::class)->middleware('permission:admin_modules,view');
-
-    /* Lesson Routes */
     Route::resource('lesson', AdminLessonController::class)->middleware('permission:admin_lessons,view');
-
-    /* Payment Routes */
     Route::resource('payment', AdminPaymentController::class)->middleware('permission:admin_payments,view');
-
-    /* Commission Routes */
     Route::resource('commission', AdminCommissionController::class)->middleware('permission:admin_commissions,view');
-
-    /* Expense Routes */
     Route::resource('expense', AdminExpenseController::class)->middleware('permission:admin_expenses,view');
-
-    /* Income Routes */
     Route::resource('income', AdminIncomeController::class)->middleware('permission:admin_incomes,view');
-
-    /* Student Recruitment Routes */
     Route::resource('recruitment', AdminRecruitmentController::class)->middleware('permission:admin_recruitments,view');
-
-    /* Graduate Routes */
     Route::resource('graduate', AdminGraduateController::class)->middleware('permission:admin_graduates,view');
 
-    /* Email Logs */
+    Route::get('discount-coupon/generate-code', [AdminDiscountCouponController::class, 'generateCode'])->name('discount-coupon.generate-code');
+    Route::resource('discount-coupon', AdminDiscountCouponController::class);
+    
+
     Route::group(['middleware' => ['permission:admin_email_logs,view']], function () {
         Route::get('email-log', [AdminEmailLogController::class, 'index'])->name('email-log.index');
         Route::get('email-log/{id}', [AdminEmailLogController::class, 'show'])->name('email-log.show');
@@ -267,10 +244,8 @@ Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'admin', 'as' =>
 
     /* Bulk Email */
     Route::prefix('bulk-email')->group(function () {
-        Route::get('/',  [AdminBulkEmailController::class, 'create'])
-            ->name('bulk-email.create')->middleware('permission:admin_send_bulk_emails,view');
-        Route::post('/', [AdminBulkEmailController::class, 'store'])
-            ->name('bulk-email.store')->middleware('permission:admin_send_bulk_emails,create');
+        Route::get('/',  [AdminBulkEmailController::class, 'create'])->name('bulk-email.create')->middleware('permission:admin_send_bulk_emails,view');
+        Route::post('/', [AdminBulkEmailController::class, 'store'])->name('bulk-email.store')->middleware('permission:admin_send_bulk_emails,create');
     });
 
     // Email attachments (keep with email-log permissions)
@@ -282,20 +257,13 @@ Route::group(['middleware' => ['auth', 'verified'], 'prefix' => 'admin', 'as' =>
 
     // Impersonation (admin only)
     Route::middleware(['permission:admin_impersonate_users,view'])->group(function () {
-        Route::get('users/{user}/impersonate', [AdminImpersonationController::class, 'quickStart'])
-            ->whereNumber('user')->name('impersonate.quick');
-
-        Route::post('users/{user}/impersonate-token', [AdminImpersonationController::class, 'createToken'])
-            ->whereNumber('user')->name('impersonate.token');
-
-        Route::get('impersonate/start/{token}', [AdminImpersonationController::class, 'start'])
-            ->where('token', '[A-Za-z0-9]{32,128}')
-            ->name('impersonate.start');
+        Route::get('users/{user}/impersonate', [AdminImpersonationController::class, 'quickStart'])->whereNumber('user')->name('impersonate.quick');
+        Route::post('users/{user}/impersonate-token', [AdminImpersonationController::class, 'createToken'])->whereNumber('user')->name('impersonate.token');
+        Route::get('impersonate/start/{token}', [AdminImpersonationController::class, 'start'])->where('token', '[A-Za-z0-9]{32,128}')->name('impersonate.start');
     });
 
     // Stop impersonating
-    Route::post('impersonate/stop', [AdminImpersonationController::class, 'stop'])
-        ->name('impersonate.stop');
+    Route::post('impersonate/stop', [AdminImpersonationController::class, 'stop'])->name('impersonate.stop');
 });
 
 

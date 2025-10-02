@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\DiscountCoupon;
+
 if (!function_exists('currency_format')) {
     function currency_format($amount, $symbol = '£'): string
     {
@@ -47,5 +49,30 @@ if(!function_exists('setFrontendSidebarActive')){
             }
         }
         return '';
+    }
+}
+
+if (!function_exists('generateDiscountCouponCode')) {
+    function generateDiscountCouponCode(): string
+    {
+        $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789*%$#@&'; // no 0,O,1,I
+        $len = strlen($alphabet);
+        $bytes = random_bytes(8);
+        $code = '';
+        for ($i = 0; $i < 8; $i++) {
+            $code .= $alphabet[ord($bytes[$i]) % $len];
+        }
+        return $code;
+    }
+}
+
+if (!function_exists('generateUniqueDiscountCouponCode')) {
+    function generateUniqueDiscountCouponCode(int $maxAttempts = 8): string
+    {
+        for ($i = 0; $i < $maxAttempts; $i++) {
+            $code = generateDiscountCouponCode();
+            if (!DiscountCoupon::where('code', $code)->exists()) return $code;
+        }
+        throw new RuntimeException('Failed to generate a unique coupon code.');
     }
 }

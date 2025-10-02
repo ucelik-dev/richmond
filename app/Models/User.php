@@ -180,7 +180,7 @@ class User extends Authenticatable
         return $q->whereHas('roles', fn($q)=>$q->where('name','student'))->whereDoesntHave('roles', fn($q)=>$q->whereIn('name',['admin','manager']));
     }
 
-    
+    public function discountCoupons() { return $this->hasMany(DiscountCoupon::class, 'agent_id'); }
 
 
 

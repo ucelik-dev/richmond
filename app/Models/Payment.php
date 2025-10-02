@@ -13,6 +13,9 @@ class Payment extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function discountCoupon() { return $this->belongsTo(DiscountCoupon::class, 'coupon_id'); }
+
+
     public function paymentStatus()
     {
         return $this->belongsTo(PaymentStatus::class, 'status_id');

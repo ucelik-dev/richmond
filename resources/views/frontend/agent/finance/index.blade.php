@@ -18,9 +18,9 @@
                         </div>
 
                         <div class="wsus__dash_course_table">
-                            <div class="row">
-                                <div class="col-12 col-xl-6 p-4">
-                                    <div class="table-responsive p-1 border rounded">
+                            <div class="row px-4 pt-3 pb-0">
+                                <div class="col-12 col-xl-6 p-2">
+                                    <div class="table-responsive">
                                         <table class="table table-bordered" id="documentsTable">
                                             <thead>
                                                 <tr>
@@ -41,8 +41,8 @@
 
                                 </div>
 
-                                <div class="col-12 col-xl-6 p-4">
-                                    <div class="table-responsive p-1 border rounded">
+                                <div class="col-12 col-xl-6 p-2">
+                                    <div class="table-responsive">
                                         <table class="table table-bordered" id="documentsTable">
                                             <thead>
                                                 <tr>
@@ -74,10 +74,10 @@
                                 @csrf
                                 @method('PUT')
 
-                                    <div class="row">
+                                    <div class="row px-4 pb-4 pt-0">
 
-                                        <div class="col-12 col-xl-6 p-4">
-                                            <div class="table-responsive p-1 border rounded">
+                                        <div class="col-12 col-xl-6 p-2">
+                                            <div class="table-responsive">
                                                 <table class="table table-bordered p-0" id="documentsTable">
                                                     <thead>
                                                         <tr>
@@ -97,8 +97,8 @@
 
                                         </div>
 
-                                        <div class="col-12 col-xl-6 p-4">
-                                            <div class="table-responsive p-1 border rounded">
+                                        <div class="col-12 col-xl-6 p-2">
+                                            <div class="table-responsive">
                                                 <table class="table table-bordered" id="documentsTable">
                                                     <thead>
                                                         <tr>
@@ -119,7 +119,7 @@
                                         </div>
 
                                         @if(auth()->user()?->canResource('agent_finance','edit'))
-                                            <div class="col-12 px-4 pb-4 pt-0">
+                                            <div class="col-12 px-2 pb-1 pt-3">
                                                 <button type="submit" class="common_btn mt-0">Update</button>
                                             </div>
                                         @endif
