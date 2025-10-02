@@ -34,10 +34,9 @@ class AdminDiscountCouponController extends Controller
         $data['created_by'] = Auth::user()->id;
 
         DiscountCoupon::create($data);
-
-        return redirect()
-            ->route('admin.discount-coupon.index')
-            ->with('success', 'Discount coupon created.');
+        
+        notyf()->success('Coupon created successfully!');
+        return to_route('admin.discount-coupon.index');
     }
 
     public function show(string $id)
@@ -62,15 +61,23 @@ class AdminDiscountCouponController extends Controller
     public function update(AdminDiscountCouponUpdateRequest $request, DiscountCoupon $coupon)
     {
         $coupon->update($request->validated());
-        return back()->with('success', 'Coupon updated.');
+
+        notyf()->success('Coupon updated successfully!');
+        return to_route('admin.discount-coupon.index');
     }
 
     public function destroy(string $id)
     {
-        $discountCoupon = DiscountCoupon::findOrFail($id);
-        $discountCoupon->delete();
 
-        return back()->with('success', 'Coupon deleted.');
+        try {
+            $discountCoupon = DiscountCoupon::findOrFail($id);
+            $discountCoupon->delete();
+            notyf()->success('Deleted successfully!');
+            return response(['status' => 'success', 'message' => 'Deleted successfully!'], 200);
+        } catch (\Exception $e) {
+            return response(['status' => 'error', 'message' => 'Something went wrong!'], 500);
+        }
+
     }
 
     public function generateCode(User $agent)

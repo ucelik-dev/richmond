@@ -22,7 +22,7 @@
                             <div class="wsus__dash_course_table">
                                 <div class="row">
                                     <div class="col-12 p-4">
-                                        <div class="table-responsive p-1 border rounded">
+                                        <div class="table-responsive">
                                             <table class="table table-bordered" id="documentsTable">
                                                 <thead>
                                                     <tr>
